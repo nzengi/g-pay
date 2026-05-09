@@ -1,0 +1,21 @@
+[package]
+name = "stealth-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Ed25519 stealth address derivation and scanning for g-pay"
+
+[lib]
+name = "stealth_core"
+
+[dependencies]
+curve25519-dalek = { workspace = true, features = ["alloc", "digest", "zeroize", "rand_core"] }
+ed25519-dalek = { workspace = true }
+sha2 = { workspace = true, features = ["std"] }
+hkdf = { workspace = true, features = ["std"] }
+subtle = { workspace = true }
+zeroize = { workspace = true }
+rand = { workspace = true }
+hex = { workspace = true }
+thiserror = { workspace = true }

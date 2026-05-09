@@ -1,0 +1,108 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gpay_postgres
+    environment:
+      POSTGRES_DB: gpay
+      POSTGRES_USER: gpay
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?required}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gpay -d gpay"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: gpay_redis
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?required}"]
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: apps/api-gateway/Dockerfile
+    image: gpay/api-gateway:latest
+    container_name: gpay_api_gateway
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://gpay:${PG_PASSWORD}@postgres:5432/gpay
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      GPAY_INTERNAL_SECRET: ${INTERNAL_SECRET:?required}
+      GPAY_MIGRATIONS_FILE: /app/deploy/migrations/001_init.sql
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  indexer:
+    build:
+      context: ..
+      dockerfile: crates/indexer/Dockerfile
+    image: gpay/indexer:latest
+    container_name: gpay_indexer
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      GPAY_RPC_URL: ${GPAY_RPC_URL:-https://api.devnet.solana.com}
+      GPAY_GATEWAY_URL: http://api-gateway:3000
+      GPAY_INTERNAL_SECRET: ${INTERNAL_SECRET}
+      GPAY_PROGRAM_ID: ${PROGRAM_ID:?required}
+      GPAY_SLICES_FILE: /config/slices.json
+      GPAY_SCAN_INTERVAL_MS: ${SCAN_INTERVAL_MS:-5000}
+      RUST_LOG: ${RUST_LOG:-info,gpay_indexer=info}
+    volumes:
+      - ../config:/config:ro
+    depends_on:
+      api-gateway:
+        condition: service_started
+    restart: unless-stopped
+
+  relayer:
+    build:
+      context: ..
+      dockerfile: crates/relayer/Dockerfile
+    image: gpay/relayer:latest
+    container_name: gpay_relayer
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      GPAY_RPC_URL: ${GPAY_RPC_URL:-https://api.devnet.solana.com}
+      GPAY_RELAYER_KEYPAIR: /config/relayer-keypair.json
+      GPAY_RELAYER_BIND: 0.0.0.0:4000
+      RUST_LOG: ${RUST_LOG:-info,gpay_relayer=info}
+    volumes:
+      - ../config:/config:ro
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: gpay_caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  redis_data:
+  caddy_data:
+  caddy_config:

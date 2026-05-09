@@ -1,0 +1,35 @@
+[package]
+name = "gpay-relayer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Fee-payer relayer for g-pay — pays SOL fees on behalf of institutions"
+
+[lib]
+name = "gpay_relayer"
+
+[[bin]]
+name = "gpay-relayer"
+path = "src/main.rs"
+
+[dependencies]
+thiserror = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+axum = "0.8"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal"] }
+tower-http = { version = "0.6", features = ["trace", "cors"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+parking_lot = "0.12"
+
+solana-client = "3"
+solana-sdk = "3"
+solana-keypair = "3"
+solana-signer = "3"
+solana-transaction = "3"
+solana-commitment-config = "3"
+base64 = "0.22"
+bincode = "1.3"

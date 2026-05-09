@@ -1,0 +1,36 @@
+[package]
+name = "gpay-indexer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Stealth address scan + RPC indexer for g-pay"
+
+[lib]
+name = "gpay_indexer"
+
+[[bin]]
+name = "gpay-indexer"
+path = "src/main.rs"
+
+[dependencies]
+stealth-core = { path = "../stealth-core" }
+quarantine-vault = { path = "../../programs/quarantine-vault", features = ["no-entrypoint"] }
+anchor-lang = { workspace = true }
+thiserror = { workspace = true }
+hex = { workspace = true }
+
+solana-client = "3"
+solana-sdk = "3"
+solana-account-decoder = "3"
+solana-commitment-config = "3"
+
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+rand = { workspace = true }

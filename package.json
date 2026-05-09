@@ -1,0 +1,21 @@
+{
+  "name": "g-pay",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "workspaces": [
+    "apps/*",
+    "sdk/typescript"
+  ],
+  "scripts": {
+    "lint:fix": "prettier */*.{js,ts} \"*/**/*{.js,.ts}\" -w",
+    "lint": "prettier */*.{js,ts} \"*/**/*{.js,.ts}\" --check"
+  },
+  "dependencies": {
+    "@anchor-lang/core": "^1.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "prettier": "^2.6.2"
+  }
+}

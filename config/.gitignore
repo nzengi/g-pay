@@ -1,0 +1,4 @@
+slices.json
+relayer-keypair.json
+authority-keypair.json
+*.local.json
