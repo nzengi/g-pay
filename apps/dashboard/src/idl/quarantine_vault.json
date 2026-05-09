@@ -1,0 +1,927 @@
+{
+  "address": "75HuPfb2n7SD7KtcQnVpCW5SVN3RP9gZ9vTXP4D4ha6C",
+  "metadata": {
+    "name": "quarantine_vault",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "g-pay quarantine vault — escrow for AML-attested stealth deposits"
+  },
+  "instructions": [
+    {
+      "name": "attest",
+      "discriminator": [
+        83,
+        148,
+        120,
+        119,
+        144,
+        139,
+        117,
+        160
+      ],
+      "accounts": [
+        {
+          "name": "oracle",
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.authority",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "verdict",
+          "type": {
+            "defined": {
+              "name": "AmlVerdict"
+            }
+          }
+        },
+        {
+          "name": "evidence_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "deposit",
+      "discriminator": [
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
+      ],
+      "accounts": [
+        {
+          "name": "depositor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.authority",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "DepositArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "deposit_token",
+      "discriminator": [
+        11,
+        156,
+        96,
+        218,
+        39,
+        163,
+        180,
+        19
+      ],
+      "accounts": [
+        {
+          "name": "depositor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.authority",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "depositor_token_account",
+          "writable": true
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119,
+                  95,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "deposit"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "DepositArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize_vault",
+      "discriminator": [
+        48,
+        191,
+        163,
+        44,
+        71,
+        129,
+        63,
+        164
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "authority"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "oracle_set",
+          "type": {
+            "vec": "pubkey"
+          }
+        },
+        {
+          "name": "min_attestations",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "refund",
+      "discriminator": [
+        2,
+        96,
+        183,
+        251,
+        63,
+        208,
+        46,
+        46
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.authority",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit",
+          "writable": true
+        },
+        {
+          "name": "refund_target",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "refund_token",
+      "discriminator": [
+        198,
+        194,
+        93,
+        209,
+        12,
+        211,
+        46,
+        174
+      ],
+      "accounts": [
+        {
+          "name": "caller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.authority",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119,
+                  95,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "deposit"
+              }
+            ]
+          }
+        },
+        {
+          "name": "refund_target_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "release",
+      "discriminator": [
+        253,
+        249,
+        15,
+        206,
+        28,
+        127,
+        193,
+        241
+      ],
+      "accounts": [
+        {
+          "name": "release_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.authority",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit",
+          "writable": true
+        },
+        {
+          "name": "target",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "release_token",
+      "discriminator": [
+        192,
+        176,
+        15,
+        44,
+        67,
+        107,
+        96,
+        143
+      ],
+      "accounts": [
+        {
+          "name": "release_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault.authority",
+                "account": "Vault"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "escrow_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119,
+                  95,
+                  116,
+                  111,
+                  107,
+                  101,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "deposit"
+              }
+            ]
+          }
+        },
+        {
+          "name": "target_token_account",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Deposit",
+      "discriminator": [
+        148,
+        146,
+        121,
+        66,
+        207,
+        173,
+        21,
+        227
+      ]
+    },
+    {
+      "name": "Vault",
+      "discriminator": [
+        211,
+        8,
+        232,
+        43,
+        2,
+        152,
+        117,
+        119
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Paused",
+      "msg": "Vault is paused"
+    },
+    {
+      "code": 6001,
+      "name": "UnauthorizedOracle",
+      "msg": "Caller is not an authorized AML oracle"
+    },
+    {
+      "code": 6002,
+      "name": "DuplicateAttestation",
+      "msg": "Oracle has already attested for this deposit"
+    },
+    {
+      "code": 6003,
+      "name": "TooManyOracles",
+      "msg": "Oracle set exceeds MAX_ORACLES"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidThreshold",
+      "msg": "min_attestations must be between 1 and oracle_set.len()"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidState",
+      "msg": "Deposit is not in the expected state"
+    },
+    {
+      "code": 6006,
+      "name": "NotYetExpired",
+      "msg": "Deposit has not yet expired"
+    },
+    {
+      "code": 6007,
+      "name": "AlreadyExpired",
+      "msg": "Deposit has already expired"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidExpiry",
+      "msg": "expire_seconds is out of allowed range"
+    },
+    {
+      "code": 6009,
+      "name": "InvalidAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6010,
+      "name": "ConflictingVerdict",
+      "msg": "Attestation verdict is inconsistent with current outcome"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidRefundAuthority",
+      "msg": "Refund authority mismatch"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidReleaseAuthority",
+      "msg": "Release authority mismatch"
+    }
+  ],
+  "types": [
+    {
+      "name": "AmlVerdict",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Clean"
+          },
+          {
+            "name": "Dirty"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Attestation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "oracle",
+            "type": "pubkey"
+          },
+          {
+            "name": "verdict",
+            "type": {
+              "defined": {
+                "name": "AmlVerdict"
+              }
+            }
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "evidence_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Deposit",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "stealth_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "ephemeral_r",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "view_tag",
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "depositor",
+            "type": "pubkey"
+          },
+          {
+            "name": "refund_addr",
+            "type": "pubkey"
+          },
+          {
+            "name": "release_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "expire_at",
+            "type": "i64"
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "DepositState"
+              }
+            }
+          },
+          {
+            "name": "attestations",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "Attestation"
+                }
+              }
+            }
+          },
+          {
+            "name": "clean_count",
+            "type": "u8"
+          },
+          {
+            "name": "dirty_count",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stealth_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "ephemeral_r",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "view_tag",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "refund_addr",
+            "type": "pubkey"
+          },
+          {
+            "name": "release_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "expire_seconds",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DepositState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Approved"
+          },
+          {
+            "name": "Rejected"
+          },
+          {
+            "name": "Released"
+          },
+          {
+            "name": "Refunded"
+          },
+          {
+            "name": "Expired"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "oracle_set",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "min_attestations",
+            "type": "u8"
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "deposit_count",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "DEPOSIT_SEED",
+      "type": "bytes",
+      "value": "[100, 101, 112, 111, 115, 105, 116]"
+    },
+    {
+      "name": "ESCROW_TOKEN_SEED",
+      "type": "bytes",
+      "value": "[101, 115, 99, 114, 111, 119, 95, 116, 111, 107, 101, 110]"
+    },
+    {
+      "name": "MAX_EXPIRE_SECONDS",
+      "type": "i64",
+      "value": "2592000"
+    },
+    {
+      "name": "MIN_EXPIRE_SECONDS",
+      "type": "i64",
+      "value": "60"
+    },
+    {
+      "name": "VAULT_SEED",
+      "type": "bytes",
+      "value": "[118, 97, 117, 108, 116]"
+    }
+  ]
+}
