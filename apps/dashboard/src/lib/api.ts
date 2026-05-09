@@ -1,12 +1,16 @@
-// In production on Vercel the dashboard is HTTPS but the gateway is HTTP-only
-// (no domain yet). Browsers block HTTPS→HTTP fetches as mixed content, so we
-// proxy through Vercel's edge: `vercel.json` rewrites `/api/*` → the gateway.
-// Override with NEXT_PUBLIC_API_URL for local dev (`npm run dev` uses http://localhost:3000).
-const BASE =
-  process.env.NEXT_PUBLIC_API_URL ??
-  (typeof window !== "undefined" && window.location.hostname !== "localhost"
-    ? "/api"
-    : "http://localhost:3000");
+// On any non-localhost browser (Vercel prod / preview / staging), always
+// hit the same-origin `/api` proxy defined in `vercel.json`. This keeps
+// the bundle on HTTPS-only origins and avoids mixed-content blocks even
+// if NEXT_PUBLIC_API_URL got set to an http:// gateway by mistake.
+// Localhost dev keeps talking to the local gateway directly.
+function resolveBase(): string {
+  if (typeof window === "undefined") return "/api";
+  const host = window.location.hostname;
+  if (host === "localhost" || host === "127.0.0.1") {
+    return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+  }
+  return "/api";
+}
 
 export interface ReceivingAddressResponse {
   deposit_id: string;
@@ -54,7 +58,7 @@ async function request<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${resolveBase()}${path}`, {
     ...init,
     headers: {
       "content-type": "application/json",
