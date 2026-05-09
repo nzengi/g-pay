@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { resolve } from "node:path";
+import { buildDemoRouter } from "./routes/demo.js";
 import { buildInternalRouter, buildRouter } from "./routes.js";
 import { createStore, type Institution, type Store } from "./store/index.js";
 
@@ -23,6 +24,7 @@ export function buildApp(
   app.get("/healthz", (c) => c.json({ ok: true }));
   app.route("/", buildRouter(store));
   app.route("/", buildInternalRouter(store, internalSecret));
+  app.route("/", buildDemoRouter(store));
   return app;
 }
 
