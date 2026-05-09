@@ -94,7 +94,7 @@ export function buildDemoRouter(store: Store) {
     const dep = await store.createDeposit({
       institutionId: inst.id,
       customerId: `demo-${Date.now().toString(36)}`,
-      amountHint: 100_000_000n, // 0.1 SOL in lamports
+      amountHint: 10_000_000n, // 0.01 SOL — small on purpose so the demo wallet lasts
       mint: "SOL",
       stealthPubkey: addr.stealthPubkey,
       ephemeralR: addr.ephemeralR,
