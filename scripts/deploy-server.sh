@@ -21,6 +21,7 @@ step() { printf "\n\033[1;36m▸ %s\033[0m\n" "$*"; }
 step "Pre-flight"
 [[ -x target/release/gpay-indexer ]] || { echo "missing target/release/gpay-indexer — run build-artifacts.sh first"; exit 1; }
 [[ -x target/release/gpay-relayer ]] || { echo "missing target/release/gpay-relayer"; exit 1; }
+[[ -x target/release/gpay-cli     ]] || { echo "missing target/release/gpay-cli (cargo build --release -p gpay-cli)"; exit 1; }
 [[ -d apps/api-gateway/dist ]]       || { echo "missing apps/api-gateway/dist — run build-artifacts.sh first"; exit 1; }
 [[ -f deploy/.env ]] || {
   echo "deploy/.env not found — copy from .env.example and fill in PG/REDIS/INTERNAL secrets, then re-run."
@@ -44,6 +45,7 @@ rsync -e "$RSYNC_E" -azR \
   crates/relayer/Dockerfile \
   target/release/gpay-indexer \
   target/release/gpay-relayer \
+  target/release/gpay-cli \
   deploy/docker-compose.yml \
   deploy/Caddyfile \
   deploy/.env \

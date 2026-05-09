@@ -35,6 +35,7 @@ services:
       dockerfile: apps/api-gateway/Dockerfile
     image: gpay/api-gateway:latest
     container_name: gpay_api_gateway
+    user: "${UID:-1000}:${GID:-1000}"
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -42,6 +43,14 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       GPAY_INTERNAL_SECRET: ${INTERNAL_SECRET:?required}
       GPAY_MIGRATIONS_FILE: /app/deploy/migrations/001_init.sql
+      GPAY_CLI: /usr/local/bin/gpay-cli
+      GPAY_RPC_URL: ${GPAY_RPC_URL:-https://api.devnet.solana.com}
+      GPAY_VAULT_AUTHORITY: ${VAULT_AUTHORITY:?required}
+      GPAY_DEMO_WALLET: /config/demo-wallet.json
+      GPAY_ORACLE_1: /config/oracles/o1.json
+      GPAY_ORACLE_2: /config/oracles/o2.json
+    volumes:
+      - ../config:/config:ro
     depends_on:
       postgres:
         condition: service_healthy

@@ -27,6 +27,9 @@ export interface PaymentStatusResponse {
   stealth_pubkey_hex: string;
   view_tag: number;
   expires_at: number;
+  on_chain_address: string | null;
+  on_chain_amount: string | null;
+  on_chain_state: string | null;
 }
 
 export interface TreasurySummaryResponse {
@@ -75,6 +78,36 @@ async function request<T>(
   return body as T;
 }
 
+export interface DemoSimulateResponse {
+  stage: "simulate";
+  signature: string;
+  deposit_pda: string;
+  explorer_tx: string | null;
+  explorer_account: string | null;
+}
+
+export interface DemoAttestResponse {
+  stage: "attest";
+  verdict: "clean" | "dirty";
+  signatures: string[];
+  explorer_txs: string[];
+}
+
+export interface DemoReleaseResponse {
+  stage: "release";
+  signature: string;
+  target: string;
+  explorer_tx: string | null;
+  explorer_target: string | null;
+}
+
+export interface DemoRefundResponse {
+  stage: "refund";
+  signature: string;
+  refund_target: string;
+  explorer_tx: string | null;
+}
+
 export const api = {
   createReceivingAddress: (apiKey: string, body: CreateAddressBody) =>
     request<ReceivingAddressResponse>(apiKey, "/v1/receiving-address", {
@@ -101,4 +134,28 @@ export const api = {
 
   treasurySummary: (apiKey: string) =>
     request<TreasurySummaryResponse>(apiKey, "/v1/treasury/deposits"),
+
+  demoSimulate: (apiKey: string, depositId: string) =>
+    request<DemoSimulateResponse>(apiKey, "/v1/demo/simulate-payment", {
+      method: "POST",
+      body: JSON.stringify({ deposit_id: depositId }),
+    }),
+
+  demoAttest: (apiKey: string, depositId: string, verdict: "clean" | "dirty") =>
+    request<DemoAttestResponse>(apiKey, "/v1/demo/attest", {
+      method: "POST",
+      body: JSON.stringify({ deposit_id: depositId, verdict }),
+    }),
+
+  demoRelease: (apiKey: string, depositId: string) =>
+    request<DemoReleaseResponse>(apiKey, "/v1/demo/release", {
+      method: "POST",
+      body: JSON.stringify({ deposit_id: depositId }),
+    }),
+
+  demoRefund: (apiKey: string, depositId: string) =>
+    request<DemoRefundResponse>(apiKey, "/v1/demo/refund", {
+      method: "POST",
+      body: JSON.stringify({ deposit_id: depositId }),
+    }),
 };

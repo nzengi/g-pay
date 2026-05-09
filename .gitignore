@@ -40,6 +40,9 @@ server-info.md
 
 # runtime config (keypairs and live slice files contain private material)
 config/*-keypair.json
+config/*-wallet.json
+config/demo-wallet.json
+config/authority.json
 config/oracles/
 config/customer.json
 config/treasury-slice.json
