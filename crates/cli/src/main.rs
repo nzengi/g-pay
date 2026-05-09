@@ -34,6 +34,9 @@ enum Cmd {
     InitVault(InitVault),
     /// Submit a SOL deposit to a freshly-derived stealth address.
     DepositSol(DepositSol),
+    /// Submit a SOL deposit using pre-derived stealth/ephemeral_r values
+    /// (e.g. ones returned by the gateway's POST /v1/receiving-address).
+    DepositSolDirect(DepositSolDirect),
     /// Sign an AML attestation for a deposit.
     Attest(Attest),
     /// Release an Approved deposit's SOL to a target address.
@@ -76,6 +79,31 @@ struct DepositSol {
     #[arg(long)]
     refund_addr: String,
     /// Pubkey allowed to call `release` on this deposit.
+    #[arg(long)]
+    release_authority: String,
+    #[arg(long, default_value_t = 3600)]
+    expire_seconds: i64,
+}
+
+#[derive(Args)]
+struct DepositSolDirect {
+    #[arg(long)]
+    depositor_keypair: PathBuf,
+    #[arg(long)]
+    vault_authority: String,
+    /// 64-char hex of the stealth pubkey (returned by the gateway).
+    #[arg(long)]
+    stealth_pubkey_hex: String,
+    /// 64-char hex of ephemeral_R (returned by the gateway).
+    #[arg(long)]
+    ephemeral_r_hex: String,
+    /// View tag byte (0..255, returned by the gateway).
+    #[arg(long)]
+    view_tag: u8,
+    #[arg(long)]
+    amount_lamports: u64,
+    #[arg(long)]
+    refund_addr: String,
     #[arg(long)]
     release_authority: String,
     #[arg(long, default_value_t = 3600)]
@@ -151,6 +179,7 @@ fn main() -> Result<()> {
     match cli.cmd {
         Cmd::InitVault(a) => init_vault(&rpc, a),
         Cmd::DepositSol(a) => deposit_sol(&rpc, a),
+        Cmd::DepositSolDirect(a) => deposit_sol_direct(&rpc, a),
         Cmd::Attest(a) => attest(&rpc, a),
         Cmd::ReleaseSol(a) => release_sol(&rpc, a),
         Cmd::RefundSol(a) => refund_sol(&rpc, a),
@@ -297,6 +326,56 @@ fn deposit_sol(rpc: &RpcClient, a: DepositSol) -> Result<()> {
             "stealth_pubkey_hex": hex::encode(stealth.stealth_pubkey),
             "ephemeral_r_hex": hex::encode(stealth.ephemeral_r),
             "view_tag": stealth.view_tag,
+            "signature": sig,
+        })
+    );
+    Ok(())
+}
+
+fn deposit_sol_direct(rpc: &RpcClient, a: DepositSolDirect) -> Result<()> {
+    let depositor = read_keypair_file(&a.depositor_keypair)
+        .map_err(|e| anyhow!("read depositor keypair: {e}"))?;
+    let vault = vault_pda(&parse_pubkey(&a.vault_authority)?);
+    let refund_addr = parse_pubkey(&a.refund_addr)?;
+    let release_authority = parse_pubkey(&a.release_authority)?;
+
+    let stealth_bytes = parse_hex32(&a.stealth_pubkey_hex)?;
+    let ephemeral_r = parse_hex32(&a.ephemeral_r_hex)?;
+    let stealth_pk = Pubkey::new_from_array(stealth_bytes);
+    let deposit = deposit_pda(&vault, &stealth_pk, &ephemeral_r);
+
+    let args = DepositArgs {
+        stealth_pubkey: stealth_pk,
+        ephemeral_r,
+        view_tag: a.view_tag,
+        amount: a.amount_lamports,
+        refund_addr,
+        release_authority,
+        expire_seconds: a.expire_seconds,
+    };
+
+    let ix = Instruction {
+        program_id: program_id(),
+        accounts: quarantine_vault::accounts::MakeDeposit {
+            depositor: depositor.pubkey(),
+            vault,
+            deposit,
+            system_program: anchor_lang::system_program::ID,
+        }
+        .to_account_metas(None),
+        data: quarantine_vault::instruction::Deposit { args }.data(),
+    };
+
+    let sig = submit(rpc, ix, &[&depositor])?;
+    println!(
+        "{}",
+        serde_json::json!({
+            "deposit_pda": deposit.to_string(),
+            "vault": vault.to_string(),
+            "stealth_pubkey": stealth_pk.to_string(),
+            "stealth_pubkey_hex": a.stealth_pubkey_hex,
+            "ephemeral_r_hex": a.ephemeral_r_hex,
+            "view_tag": a.view_tag,
             "signature": sig,
         })
     );
