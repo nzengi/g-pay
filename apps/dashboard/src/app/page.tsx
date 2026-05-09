@@ -75,12 +75,18 @@ export default function LandingPage() {
               {busy ? "Spinning up demo…" : "Try the live demo →"}
             </button>
             <a
+              href="/docs"
+              className="h-12 px-6 rounded-md border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors inline-flex items-center"
+            >
+              API & developer docs
+            </a>
+            <a
               href="https://github.com/nzengi/g-pay"
               target="_blank"
               rel="noopener noreferrer"
               className="h-12 px-6 rounded-md border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors inline-flex items-center"
             >
-              View source on GitHub ↗
+              GitHub ↗
             </a>
           </div>
 
