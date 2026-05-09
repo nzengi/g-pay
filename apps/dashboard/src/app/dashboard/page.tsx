@@ -19,6 +19,12 @@ const PROGRAM_ID = new PublicKey(
 const VAULT_AUTHORITY = new PublicKey(
   "5EiLNkpp3QiH1wzBEHnCdWSpxREFH2q5jje9S2gVmaMz",
 );
+// On-server demo wallet — plays the institution role for the AML attest +
+// release steps. We set it as `release_authority` at deposit time so step 5
+// (which signs with the same key server-side) is allowed by the program.
+const DEMO_RELEASE_AUTHORITY = new PublicKey(
+  "E5sMsfpm77mEgW1gb1vo4C5ZbsDBhwv8VT3RLp28ZvW6",
+);
 const DEMO_AMOUNT_LAMPORTS = 10_000_000; // 0.01 SOL
 const API_BASE_PUBLIC = "/api"; // Vercel rewrite to gateway
 
@@ -215,8 +221,11 @@ function Playground({ apiKey }: { apiKey: string }) {
     try {
       const stealth = new PublicKey(hexToBytes(address.stealth_pubkey_hex));
       const ephemeralR = hexToBytes(address.ephemeral_r_hex);
+      // refund returns to the customer's own wallet
       const refundAddr = publicKey;
-      const releaseAuthority = publicKey;
+      // release_authority must equal the key that will sign /v1/demo/release
+      // (the on-server demo wallet that plays the institution role)
+      const releaseAuthority = DEMO_RELEASE_AUTHORITY;
 
       const [vault] = PublicKey.findProgramAddressSync(
         [Buffer.from("vault"), VAULT_AUTHORITY.toBytes()],
