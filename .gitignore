@@ -50,3 +50,7 @@ config/slices.json
 
 # program keypair: regenerate per deployer with `anchor keys sync`
 target/deploy/*-keypair.json
+
+./docs/DEPLOY.md
+./docs/RUNBOOK.md
+./docs/vercel.md
