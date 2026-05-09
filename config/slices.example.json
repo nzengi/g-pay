@@ -1,0 +1,11 @@
+{
+  "_comment": "Demo slices file — DO NOT use in production. View private keys live on disk only because this is the local dev bundle.",
+  "slices": [
+    {
+      "slice_id": 1,
+      "view_priv_hex": "a0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbe00",
+      "spend_pub_hex": "616e237719716e25ead63d831f9117f79b5aa05af8be30ff0eddb3dc43e8bdcf",
+      "nonce": 0
+    }
+  ]
+}

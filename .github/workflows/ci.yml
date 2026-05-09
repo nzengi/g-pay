@@ -1,0 +1,101 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    name: Rust (host crates)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry + target
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: host
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy (host crates)
+        run: cargo clippy -p stealth-core -p gpay-indexer -p gpay-relayer -p gpay-cli --all-targets -- -D warnings
+
+      - name: cargo test (host crates only — Anchor program covered separately)
+        run: cargo test -p stealth-core -p gpay-indexer -p gpay-relayer --all-features
+
+  typescript:
+    name: TypeScript (gateway + dashboard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: typecheck — api-gateway
+        run: npm --prefix apps/api-gateway run typecheck
+
+      - name: build — api-gateway
+        run: npm --prefix apps/api-gateway run build
+
+      - name: test — api-gateway
+        run: npm --prefix apps/api-gateway test
+
+      - name: build — dashboard
+        run: npm --prefix apps/dashboard run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3000
+
+  anchor:
+    name: Anchor program (LiteSVM)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo for SBF build
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: anchor
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor CLI
+        run: cargo install anchor-cli --version 1.0.2 --locked
+
+      - name: Generate program keypair
+        run: |
+          mkdir -p target/deploy
+          solana-keygen new --no-bip39-passphrase --silent \
+            --outfile target/deploy/quarantine_vault-keypair.json
+          anchor keys sync
+
+      - name: anchor build
+        run: anchor build
+
+      - name: cargo test -p quarantine-vault
+        run: cargo test -p quarantine-vault

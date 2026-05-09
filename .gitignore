@@ -1,0 +1,49 @@
+# build artifacts
+target
+**/*.rs.bk
+node_modules
+**/node_modules
+**/.next
+dist
+build
+.anchor
+.local
+.deploy-staging
+test-ledger
+
+# editor / OS
+.DS_Store
+.idea
+.vscode
+*.swp
+.yarn
+
+# tooling caches
+.surfpool
+.turbo
+.next
+.vercel
+
+# logs
+*.log
+
+# secrets — never commit
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+id_ed25519*
+id_rsa*
+secrets/
+server-info.md
+
+# runtime config (keypairs and live slice files contain private material)
+config/*-keypair.json
+config/oracles/
+config/customer.json
+config/treasury-slice.json
+config/slices.json
+
+# program keypair: regenerate per deployer with `anchor keys sync`
+target/deploy/*-keypair.json

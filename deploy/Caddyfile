@@ -1,0 +1,19 @@
+# IP-only deployment, HTTP for V1 (no domain → no Let's Encrypt).
+# When you point a domain at this server, replace `:80 {` with `your-domain.com {`
+# and Caddy will fetch a TLS cert automatically.
+
+{
+	log {
+		level INFO
+	}
+}
+
+:80 {
+	encode zstd gzip
+
+	# Block external access to internal-only routes.
+	@internal path /v1/internal/*
+	respond @internal 404
+
+	reverse_proxy api-gateway:3000
+}
