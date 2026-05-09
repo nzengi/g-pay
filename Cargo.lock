@@ -2118,7 +2118,7 @@ dependencies = [
  "solana-instruction",
  "solana-keypair",
  "solana-message",
- "solana-pubkey 3.0.0",
+ "solana-pubkey 4.2.0",
  "solana-sdk",
  "solana-signer",
  "solana-transaction",
