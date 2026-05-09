@@ -1,4 +1,12 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+// In production on Vercel the dashboard is HTTPS but the gateway is HTTP-only
+// (no domain yet). Browsers block HTTPS→HTTP fetches as mixed content, so we
+// proxy through Vercel's edge: `vercel.json` rewrites `/api/*` → the gateway.
+// Override with NEXT_PUBLIC_API_URL for local dev (`npm run dev` uses http://localhost:3000).
+const BASE =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (typeof window !== "undefined" && window.location.hostname !== "localhost"
+    ? "/api"
+    : "http://localhost:3000");
 
 export interface ReceivingAddressResponse {
   deposit_id: string;
