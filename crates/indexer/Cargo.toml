@@ -21,7 +21,7 @@ thiserror = { workspace = true }
 hex = { workspace = true }
 
 solana-client = "3"
-solana-sdk = "3"
+solana-sdk = "4"
 solana-account-decoder = "3"
 solana-commitment-config = "3"
 
