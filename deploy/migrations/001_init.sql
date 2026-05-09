@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS deposits_stealth_idx ON deposits (stealth_pubkey);
 INSERT INTO institutions (id, api_key, spend_pub, view_pub, release_authority)
 VALUES (
   'demo_bank',
-  'demo-key-please-rotate',
+  'g-p_demo_h6kj9d8s7g6f5d4',
   decode('616e237719716e25ead63d831f9117f79b5aa05af8be30ff0eddb3dc43e8bdcf', 'hex'),
   decode('3e97bbe3dad77cdbab3b9d7a5af963868b2ee668470874b566dad4a32076c98b', 'hex'),
   decode('0000000000000000000000000000000000000000000000000000000000000000', 'hex')

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const PROGRAM_ID = "75HuPfb2n7SD7KtcQnVpCW5SVN3RP9gZ9vTXP4D4ha6C";
 const API_BASE = "https://g-pay-dashboard.vercel.app/api";
-const DEMO_KEY = "demo-key-please-rotate";
+const DEMO_KEY = "g-p_demo_h6kj9d8s7g6f5d4";
 
 export default function ApiPage() {
   return (

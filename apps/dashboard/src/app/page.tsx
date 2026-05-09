@@ -1,160 +1,154 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ApiError } from "../lib/api";
 import { getApiKey, setApiKey } from "../lib/auth";
 
-const DEMO_KEY = "demo-key-please-rotate";
+const DEMO_KEY = "g-p_demo_h6kj9d8s7g6f5d4";
+const PROGRAM_ID = "75HuPfb2n7SD7KtcQnVpCW5SVN3RP9gZ9vTXP4D4ha6C";
 
-export default function LandingPage() {
+export default function LoginPage() {
   const router = useRouter();
   const [value, setValue] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const [showHint, setShowHint] = useState(false);
 
   useEffect(() => {
-    if (getApiKey()) router.replace("/deposits");
+    if (getApiKey()) router.replace("/dashboard");
   }, [router]);
 
-  async function startDemo() {
-    setBusy(true);
-    setErr(null);
-    try {
-      // Use the relative /api proxy so this works in production via Vercel.
-      const res = await fetch("/api/v1/demo/init", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": DEMO_KEY,
-        },
-        cache: "no-store",
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new ApiError(res.status, body?.error ?? res.statusText);
-      }
-      const json = (await res.json()) as { deposit_id: string };
-      setApiKey(DEMO_KEY);
-      router.push(`/deposits/${json.deposit_id}`);
-    } catch (e) {
-      setErr(e instanceof ApiError ? `${e.status}: ${e.message}` : String(e));
-      setBusy(false);
-    }
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const k = value.trim();
+    if (!k) return;
+    setApiKey(k);
+    router.push("/dashboard");
   }
 
   return (
     <main className="flex-1 flex flex-col">
-      <section className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-2xl">
-          <div className="mb-10 flex items-center gap-2 text-lg font-semibold tracking-tight">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-[var(--accent)]" />
+      <header className="border-b border-[var(--border)]">
+        <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2 font-semibold tracking-tight">
+            <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent)]" />
             g-pay
+            <span className="ml-2 text-[10px] uppercase tracking-wider text-[var(--muted)] border border-[var(--border)] rounded px-1.5 py-0.5">
+              devnet
+            </span>
           </div>
-
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
-            Stealth-address payment privacy<br />for institutions on Solana.
-          </h1>
-          <p className="text-base text-[var(--muted)] max-w-xl mb-2">
-            Each customer payment lands at a freshly derived stealth address,
-            an AML attestation gate runs before any funds touch the institution,
-            and approved deposits are released to a fresh treasury slice — no
-            on-chain link to the main wallet, and no zero-knowledge proofs.
-          </p>
-          <p className="text-sm text-[var(--muted)] max-w-xl mb-8">
-            All actions in this demo execute on Solana <strong>devnet</strong>.
-            Each transaction is real and verifiable on Solana Explorer.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 mb-8">
-            <button
-              onClick={startDemo}
-              disabled={busy}
-              className="h-12 px-6 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
-              {busy ? "Spinning up demo…" : "Try the live demo →"}
-            </button>
-            <a
+          <nav className="flex items-center gap-1 text-sm">
+            <Link
               href="/docs"
-              className="h-12 px-6 rounded-md border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors inline-flex items-center"
+              className="px-3 h-9 inline-flex items-center rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)]"
             >
               Docs
-            </a>
-            <a
+            </Link>
+            <Link
               href="/api"
-              className="h-12 px-6 rounded-md border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors inline-flex items-center"
+              className="px-3 h-9 inline-flex items-center rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)]"
             >
               API
-            </a>
+            </Link>
             <a
               href="https://github.com/nzengi/g-pay"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-12 px-6 rounded-md border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors inline-flex items-center"
+              className="px-3 h-9 inline-flex items-center rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)]"
             >
               GitHub ↗
             </a>
-          </div>
+          </nav>
+        </div>
+      </header>
 
-          {err && (
-            <div className="mb-6 p-3 rounded-md border border-[var(--danger)] text-[var(--danger)] text-sm">
-              {err}
-            </div>
-          )}
+      <section className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <h1 className="text-2xl font-semibold tracking-tight mb-1">
+            Sign in with an institution API key
+          </h1>
+          <p className="text-sm text-[var(--muted)] mb-6 leading-6">
+            Paste a key issued to your institution. Keys live in your browser
+            only — they are never sent to anything other than the g-pay
+            gateway.
+          </p>
 
-          <div className="border-t border-[var(--border)] pt-6 mt-6">
-            <details className="text-sm">
-              <summary className="cursor-pointer text-[var(--muted)]">
-                Sign in with an institution API key (advanced)
-              </summary>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!value.trim()) return;
-                  setApiKey(value.trim());
-                  router.push("/deposits");
-                }}
-                className="flex flex-col gap-3 mt-4 max-w-sm"
-              >
-                <input
-                  type="password"
-                  placeholder="API key"
-                  value={value}
-                  onChange={(e) => setValue(e.target.value)}
-                  autoComplete="off"
-                  className="h-10 px-3 rounded-md bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:border-[var(--accent)] mono"
-                />
-                <button
-                  type="submit"
-                  className="h-10 rounded-md bg-[var(--surface-2)] border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors"
-                >
-                  Continue
-                </button>
-                <p className="text-xs text-[var(--muted)]">
-                  Demo key:{" "}
-                  <code className="mono text-[var(--foreground)]">
+          <form onSubmit={submit} className="flex flex-col gap-3">
+            <label className="text-xs uppercase tracking-wider text-[var(--muted)]">
+              API key
+            </label>
+            <input
+              type="text"
+              placeholder="g-p_live_…"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+              required
+              className="h-11 px-3 rounded-md bg-[var(--surface)] border border-[var(--border)] text-sm focus:outline-none focus:border-[var(--accent)] mono"
+            />
+            <button
+              type="submit"
+              disabled={!value.trim()}
+              className="h-11 rounded-md bg-[var(--accent)] text-[var(--accent-fg)] text-sm font-medium hover:opacity-90 disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+            >
+              Continue
+            </button>
+          </form>
+
+          <div className="mt-6 border-t border-[var(--border)] pt-4">
+            <button
+              onClick={() => setShowHint((s) => !s)}
+              className="text-xs text-[var(--muted)] hover:text-[var(--foreground)]"
+            >
+              {showHint ? "▾" : "▸"} Don&apos;t have a key? Use the public demo
+              institution
+            </button>
+            {showHint && (
+              <div className="mt-3 p-3 rounded-md bg-[var(--surface)] border border-[var(--border)] text-xs leading-5">
+                <p className="text-[var(--muted)] mb-2">
+                  This key belongs to a shared demo institution on Solana
+                  devnet. Anyone can use it to drive the playground.
+                </p>
+                <div className="flex items-center gap-2 mb-2">
+                  <code className="mono text-[var(--foreground)] flex-1 break-all">
                     {DEMO_KEY}
                   </code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(DEMO_KEY);
+                      setValue(DEMO_KEY);
+                    }}
+                    className="px-2 h-7 inline-flex items-center text-[10px] uppercase tracking-wider rounded border border-[var(--border)] hover:border-[var(--accent)]"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <p className="text-[var(--muted)]">
+                  Real institutions get keys with{" "}
+                  <code className="mono">g-p_live_</code> /{" "}
+                  <code className="mono">g-p_test_</code> prefix on V2.
                 </p>
-              </form>
-            </details>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-[var(--border)] px-6 py-4 text-xs text-[var(--muted)] flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-        <div>
-          Solana devnet · Anchor program{" "}
-          <a
-            href="https://explorer.solana.com/address/75HuPfb2n7SD7KtcQnVpCW5SVN3RP9gZ9vTXP4D4ha6C?cluster=devnet"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mono underline-offset-2 hover:underline"
-          >
-            75HuPfb2n…D4ha6C ↗
-          </a>
+      <footer className="border-t border-[var(--border)] px-6 py-4 text-xs text-[var(--muted)]">
+        <div className="mx-auto max-w-6xl flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+          <div>
+            Solana devnet · Anchor program{" "}
+            <a
+              href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mono underline-offset-2 hover:underline"
+            >
+              {PROGRAM_ID.slice(0, 10)}…{PROGRAM_ID.slice(-6)}
+            </a>
+          </div>
+          <div>V1 · pre-audit · devnet only</div>
         </div>
-        <div>Pre-audit. Devnet only. See SECURITY.md.</div>
       </footer>
     </main>
   );

@@ -2,7 +2,6 @@
 
 import { AnchorProvider, BN, Program, type Idl } from "@coral-xyz/anchor";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { WalletModalButton } from "@solana/wallet-adapter-react-ui";
 import {
   PublicKey,
   SystemProgram,
@@ -12,7 +11,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ApiKeyGate } from "../../components/ApiKeyGate";
-import { Header } from "../../components/Header";
 import idlJson from "../../idl/quarantine_vault.json";
 
 const PROGRAM_ID = new PublicKey(
@@ -71,23 +69,20 @@ export default function PlaygroundPage() {
   return (
     <ApiKeyGate>
       {(apiKey) => (
-        <>
-          <Header />
-          <main className="mx-auto max-w-6xl p-6">
-            <div className="mb-6">
-              <h1 className="text-2xl font-semibold tracking-tight">
-                Live API playground
-              </h1>
-              <p className="text-sm text-[var(--muted)] mt-1">
-                Six-step lifecycle on Solana devnet. Connect your own wallet
-                for the customer side, then walk through each API call. Every
-                button you press is wired to a real endpoint and a real
-                on-chain transaction.
-              </p>
-            </div>
-            <Playground apiKey={apiKey} />
-          </main>
-        </>
+        <div className="mx-auto max-w-6xl p-6">
+          <div className="mb-6">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Playground
+            </h1>
+            <p className="text-sm text-[var(--muted)] mt-1">
+              Six-step lifecycle on Solana devnet. Connect your own wallet for
+              the customer side, then walk through each API call. Every button
+              you press is wired to a real endpoint and a real on-chain
+              transaction.
+            </p>
+          </div>
+          <Playground apiKey={apiKey} />
+        </div>
       )}
     </ApiKeyGate>
   );
@@ -392,7 +387,7 @@ function Playground({ apiKey }: { apiKey: string }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
       <div className="space-y-4">
-        <ConnectCard
+        <WalletStatusBanner
           connected={connected}
           pubkey={publicKey?.toBase58() ?? null}
           balance={walletBalance}
@@ -764,7 +759,7 @@ function Step({
   );
 }
 
-function ConnectCard({
+function WalletStatusBanner({
   connected,
   pubkey,
   balance,
@@ -773,77 +768,54 @@ function ConnectCard({
   pubkey: string | null;
   balance: number | null;
 }) {
-  return (
-    <section className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-5">
-      <div className="flex items-start gap-3">
-        <span
-          className={
-            "w-7 h-7 shrink-0 rounded-full text-xs font-semibold inline-flex items-center justify-center " +
-            (connected ? "bg-[var(--success)]" : "bg-[var(--accent)]") +
-            " text-white"
-          }
+  if (connected && pubkey) {
+    return (
+      <div className="flex items-center justify-between gap-3 p-3 rounded-md border border-[var(--border)] bg-[var(--surface)] text-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--success)] shrink-0" />
+          <span className="text-[var(--muted)]">customer wallet:</span>
+          <a
+            href={`https://explorer.solana.com/address/${pubkey}?cluster=devnet`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mono text-[var(--accent)] underline-offset-2 hover:underline truncate"
+          >
+            {shortAddr(pubkey)} ↗
+          </a>
+          <span className="text-[var(--muted)] hidden sm:inline">·</span>
+          <span className="mono hidden sm:inline">
+            {balance == null ? "…" : `${balance.toFixed(4)} SOL`}
+          </span>
+        </div>
+        <a
+          href="https://faucet.solana.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[var(--muted)] hover:text-[var(--foreground)] shrink-0"
         >
-          0
+          devnet faucet ↗
+        </a>
+      </div>
+    );
+  }
+  return (
+    <div className="p-3 rounded-md border border-[var(--warn)] bg-[var(--warn)] bg-opacity-5 text-xs flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2">
+        <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--warn)] shrink-0" />
+        <span>
+          Connect a wallet from the header to play the customer role. Need
+          test SOL?{" "}
+          <a
+            href="https://faucet.solana.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent)] underline-offset-2 hover:underline"
+          >
+            devnet faucet ↗
+          </a>
         </span>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold tracking-tight">
-            Connect a Solana wallet (devnet)
-          </h3>
-          <p className="text-xs text-[var(--muted)] mt-1 leading-5">
-            Plays the customer role. The wallet signs and pays for the
-            on-chain deposit. Need test SOL? Use the{" "}
-            <a
-              href="https://faucet.solana.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--accent)] underline-offset-2 hover:underline"
-            >
-              official devnet faucet ↗
-            </a>
-            .
-          </p>
-        </div>
       </div>
-
-      <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
-        <div className="text-xs">
-          {connected && pubkey ? (
-            <div className="space-y-0.5">
-              <div>
-                <span className="text-[var(--muted)]">pubkey:</span>{" "}
-                <a
-                  href={`https://explorer.solana.com/address/${pubkey}?cluster=devnet`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mono text-[var(--accent)] underline-offset-2 hover:underline"
-                >
-                  {shortAddr(pubkey)} ↗
-                </a>
-              </div>
-              <div>
-                <span className="text-[var(--muted)]">devnet balance:</span>{" "}
-                <span className="mono">
-                  {balance == null ? "…" : `${balance.toFixed(4)} SOL`}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="text-[var(--muted)]">No wallet connected.</div>
-          )}
-        </div>
-        <WalletModalButton
-          style={{
-            background: "var(--accent)",
-            color: "var(--accent-fg)",
-            borderRadius: 6,
-            height: 36,
-            padding: "0 14px",
-            fontSize: 14,
-            fontWeight: 500,
-          }}
-        />
-      </div>
-    </section>
+    </div>
   );
 }
 

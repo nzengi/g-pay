@@ -30,7 +30,7 @@ export function buildApp(
 
 const DEMO_INSTITUTION: Institution = {
   id: "demo_bank",
-  apiKey: "demo-key-please-rotate",
+  apiKey: "g-p_demo_h6kj9d8s7g6f5d4",
   spendPub: hexToBytes(
     "616e237719716e25ead63d831f9117f79b5aa05af8be30ff0eddb3dc43e8bdcf",
   ),
