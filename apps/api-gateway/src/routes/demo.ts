@@ -137,7 +137,7 @@ export function buildDemoRouter(store: Store) {
       "--refund-addr",
       bytesToBase58(dep.refundAddr),
       "--release-authority",
-      cfg.vaultAuthorityPubkey,
+      demoWalletPubkey(),
       "--expire-seconds",
       String(Math.max(60, Math.floor((dep.expiresAt - Date.now()) / 1000))),
     ]).catch((e) => ({ error: e instanceof Error ? e.message : String(e) }));
