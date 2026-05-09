@@ -51,6 +51,18 @@ config/slices.json
 # program keypair: regenerate per deployer with `anchor keys sync`
 target/deploy/*-keypair.json
 
-./docs/DEPLOY.md
-./docs/RUNBOOK.md
-./docs/vercel.md
+# operator-only docs (deployment specifics, server IPs, runbook secrets)
+docs/DEPLOY.md
+docs/RUNBOOK.md
+docs/VERCEL.md
+docs/SERVER*.md
+docs/private/
+
+# vercel.json removed in favor of next.config.ts rewrites + GPAY_GATEWAY_URL
+# env var, so the gateway URL never lands in the repo. Keep this here in
+# case someone reintroduces it.
+apps/dashboard/vercel.json
+
+# operator local env (sourced manually, e.g. `source ~/.config/g-pay/env`)
+.envrc
+.env.deploy

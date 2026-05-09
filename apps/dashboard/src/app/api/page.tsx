@@ -151,11 +151,11 @@ function BaseUrlAuth() {
         ]}
       />
       <Callout tone="info">
-        The public URL is a Vercel rewrite that proxies{" "}
-        <code className="mono">/api/*</code> to the gateway running at the
-        server&apos;s IP over HTTP. This keeps the browser on HTTPS and avoids
-        mixed-content blocks. If you bypass Vercel, the gateway also serves the
-        same routes directly at <code className="mono">http://***REDACTED***</code>.
+        The public URL is a same-origin proxy: the dashboard&apos;s host
+        rewrites <code className="mono">/api/*</code> to the gateway over a
+        private connection. This keeps the browser on HTTPS and avoids
+        mixed-content blocks without exposing the gateway&apos;s direct
+        endpoint.
       </Callout>
     </section>
   );

@@ -9,7 +9,12 @@ set -euo pipefail
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO"
 
-SERVER="${GPAY_SERVER:-deploy@***REDACTED***}"
+if [[ -z "${GPAY_SERVER:-}" ]]; then
+  echo "GPAY_SERVER is required (e.g. deploy@your-host)." >&2
+  echo "Tip: put it in ~/.config/g-pay/env (gitignored) and source it." >&2
+  exit 1
+fi
+SERVER="$GPAY_SERVER"
 KEY="${GPAY_SSH_KEY:-$HOME/.ssh/id_ed25519_gpay}"
 REMOTE="${GPAY_REMOTE_DIR:-/home/deploy/g-pay}"
 SSH=(ssh -i "$KEY" -o StrictHostKeyChecking=accept-new)

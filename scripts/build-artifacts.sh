@@ -28,5 +28,5 @@ cat <<EOF
 
 \033[1;32m✔ Build artifacts ready.\033[0m
 
-Next: ./scripts/deploy-server.sh  to push to ***REDACTED***.
+Next: ./scripts/deploy-server.sh  to push to your configured GPAY_SERVER.
 EOF
