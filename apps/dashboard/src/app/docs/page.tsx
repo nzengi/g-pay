@@ -1,34 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicHeader } from "../../components/PublicHeader";
 
 export const metadata: Metadata = {
-  title: "g-pay · API & developer docs",
+  title: "g-pay · Docs",
   description:
-    "REST API, Anchor program reference, and stealth-address derivation spec for g-pay on Solana devnet.",
+    "Project guide: what g-pay V1 actually does on Solana devnet, the three primitives it composes, the end-to-end demo flow, and what changes in V2.",
 };
 
 const PROGRAM_ID = "75HuPfb2n7SD7KtcQnVpCW5SVN3RP9gZ9vTXP4D4ha6C";
-const API_BASE = "https://g-pay-dashboard.vercel.app/api";
-const DEMO_KEY = "demo-key-please-rotate";
 
 export default function DocsPage() {
   return (
     <div className="min-h-full">
-      <Header />
+      <PublicHeader />
       <div className="mx-auto max-w-6xl px-6 py-10 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10">
         <Toc />
         <main className="min-w-0 space-y-16">
           <Hero />
-          <WhatItDoes />
-          <Architecture />
-          <QuickStart />
-          <RestApi />
-          <DemoApi />
-          <OnChain />
-          <StealthMath />
-          <IndexerRelayer />
-          <Security />
-          <Resources />
+          <Problem />
+          <Primitives />
+          <EndToEnd />
+          <Status />
+          <RepoStructure />
+          <V2Hints />
+          <Caveats />
         </main>
       </div>
       <Footer />
@@ -38,67 +34,16 @@ export default function DocsPage() {
 
 /* ──────────────────────────────────────────────────────────────────────── */
 
-function Header() {
-  return (
-    <header className="border-b border-[var(--border)]">
-      <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="inline-block w-2 h-2 rounded-full bg-[var(--accent)]" />
-          g-pay
-        </Link>
-        <nav className="flex items-center gap-1 text-sm">
-          <Link
-            href="/"
-            className="px-3 h-9 inline-flex items-center rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)]"
-          >
-            Demo
-          </Link>
-          <span className="px-3 h-9 inline-flex items-center rounded-md bg-[var(--surface-2)]">
-            Docs
-          </span>
-          <a
-            href="https://github.com/nzengi/g-pay"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 h-9 inline-flex items-center rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface)]"
-          >
-            GitHub ↗
-          </a>
-        </nav>
-      </div>
-    </header>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="border-t border-[var(--border)] mt-16 px-6 py-6 text-xs text-[var(--muted)]">
-      <div className="mx-auto max-w-6xl flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-        <div>
-          Solana devnet · Anchor program{" "}
-          <ExternalLink href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`}>
-            {PROGRAM_ID.slice(0, 10)}…{PROGRAM_ID.slice(-6)}
-          </ExternalLink>
-        </div>
-        <div>Pre-audit. Devnet only. See SECURITY.md.</div>
-      </div>
-    </footer>
-  );
-}
-
 function Toc() {
   const items: [string, string][] = [
     ["overview", "Overview"],
-    ["what", "What it does"],
-    ["architecture", "Architecture"],
-    ["quickstart", "Quick start"],
-    ["api", "REST API"],
-    ["demo-api", "Demo API"],
-    ["onchain", "Anchor program"],
-    ["stealth", "Stealth-address math"],
-    ["pipeline", "Indexer & relayer"],
-    ["security", "Security"],
-    ["resources", "Resources"],
+    ["problem", "The problem"],
+    ["primitives", "Three primitives"],
+    ["flow", "End-to-end flow"],
+    ["status", "What V1 ships"],
+    ["repo", "Repo structure"],
+    ["v2", "V2 roadmap"],
+    ["caveats", "Caveats"],
   ];
   return (
     <aside className="hidden lg:block">
@@ -118,8 +63,34 @@ function Toc() {
             </li>
           ))}
         </ul>
+        <div className="mt-6 pt-6 border-t border-[var(--border)] text-xs">
+          <Link
+            href="/api"
+            className="text-[var(--muted)] hover:text-[var(--foreground)]"
+          >
+            → API reference
+          </Link>
+        </div>
       </nav>
     </aside>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-[var(--border)] mt-16 px-6 py-6 text-xs text-[var(--muted)]">
+      <div className="mx-auto max-w-6xl flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+        <div>
+          Solana devnet · Anchor program{" "}
+          <ExternalLink
+            href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`}
+          >
+            {PROGRAM_ID.slice(0, 10)}…{PROGRAM_ID.slice(-6)}
+          </ExternalLink>
+        </div>
+        <div>V1 · pre-audit · devnet only</div>
+      </div>
+    </footer>
   );
 }
 
@@ -127,780 +98,548 @@ function Toc() {
 
 function Hero() {
   return (
-    <section id="overview" className="space-y-6 scroll-mt-20">
+    <section id="overview" className="space-y-5 scroll-mt-20">
       <div className="inline-flex items-center gap-2 px-3 h-7 rounded-full bg-[var(--surface-2)] border border-[var(--border)] text-xs">
         <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--success)]" />
-        Solana devnet · live
+        V1 live on Solana devnet
       </div>
       <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">
-        API & developer docs
+        What g-pay is, what V1 does, and where V2 takes it.
       </h1>
-      <p className="text-base text-[var(--muted)] max-w-2xl">
-        Everything you need to integrate, judge, or fork g-pay. Each endpoint
-        below is wired to a live deployment on Solana devnet — copy any{" "}
-        <code className="mono text-[var(--foreground)]">curl</code> block and
-        run it locally.
+      <p className="text-base text-[var(--muted)] max-w-2xl leading-7">
+        g-pay is an institutional payments backend on Solana that protects the
+        institution&apos;s on-chain identity by combining three classical
+        primitives: per-payment stealth addresses, an AML-gated escrow program,
+        and a no-consolidation treasury pattern. No zero-knowledge proofs.
       </p>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 pt-2">
         <Link
           href="/"
           className="h-10 px-4 inline-flex items-center rounded-md bg-[var(--accent)] text-[var(--accent-fg)] text-sm font-medium hover:opacity-90"
         >
           Try the live demo →
         </Link>
-        <ExternalLink
-          href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`}
-          variant="button"
+        <Link
+          href="/api"
+          className="h-10 px-4 inline-flex items-center rounded-md border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors"
         >
-          On-chain program ↗
-        </ExternalLink>
+          API reference
+        </Link>
         <ExternalLink href="https://github.com/nzengi/g-pay" variant="button">
-          Source on GitHub ↗
+          GitHub ↗
         </ExternalLink>
       </div>
     </section>
   );
 }
 
-function WhatItDoes() {
+function Problem() {
   return (
-    <section id="what" className="space-y-4 scroll-mt-20">
-      <SectionHeading>What it does</SectionHeading>
+    <section id="problem" className="space-y-4 scroll-mt-20">
+      <SectionHeading>The problem</SectionHeading>
       <p className="text-sm leading-7">
-        Imagine a bank that accepts a Solana payment from a wallet which is
-        added to an OFAC sanctions list six months later. The bank&apos;s
-        treasury is now linked, on-chain, to a sanctioned entity. Lawsuit.
-        Remediation costs. The risk is not the amount — it&apos;s the address.
+        On a transparent chain like Solana, an institution&apos;s treasury
+        address is a long-lived identity. If a customer pays from a wallet that
+        is later added to a sanctions list, the institution&apos;s treasury is
+        now linked, on-chain, to a sanctioned entity. Public ledger means
+        public liability — and unlike private banking, you cannot &quot;not
+        accept&quot; a transaction once it&apos;s on chain.
       </p>
       <p className="text-sm leading-7">
-        g-pay puts an AML attestation gate <em>before</em> any funds touch a
-        treasury address, and uses a fresh stealth address per payment so there
-        is no on-chain link between sender, receiver, or the institution&apos;s
-        main funds. Released funds land on a brand-new pubkey, never
-        consolidated. The whole stack is non-ZK — three classical Solana
-        primitives wired together.
+        The interesting risk is the <strong>address</strong>, not the amount.
+        Existing Solana privacy work (Token-2022 confidential transfers,
+        Confidential Balances) hides amounts but leaves addresses public. g-pay
+        is the opposite: amounts stay public, addresses change every payment,
+        and an attestation gate runs <em>before</em> any funds touch the
+        institution&apos;s side.
       </p>
-      <Callout tone="warn">
-        Status: pre-audit, <strong>devnet only</strong>. The Anchor program has
-        not undergone third-party review; the AML oracle is a stub. See{" "}
-        <ExternalLink href="https://github.com/nzengi/g-pay/blob/main/SECURITY.md">
-          SECURITY.md
-        </ExternalLink>{" "}
-        before any real value flows.
-      </Callout>
     </section>
   );
 }
 
-function Architecture() {
+function Primitives() {
   return (
-    <section id="architecture" className="space-y-4 scroll-mt-20">
-      <SectionHeading>Architecture</SectionHeading>
+    <section id="primitives" className="space-y-6 scroll-mt-20">
+      <SectionHeading>Three primitives</SectionHeading>
       <p className="text-sm leading-7">
-        Three primitives: <strong>Ed25519 stealth addresses</strong> (per-payment
-        receive address), a <strong>quarantine vault</strong> Anchor program
-        (escrow with m-of-n AML attestation), and a{" "}
-        <strong>hyperscaled treasury</strong> (no consolidation: each release
-        lands on a fresh pubkey).
+        The whole stack is the composition of three things any Solana developer
+        already understands. None of them require ZK.
       </p>
-      <CodeBlock>
-        {`SOLANA  (devnet)
-   programs/quarantine-vault/      Anchor program (8 ix; SOL + Token + Token-2022)
-        ▲
-        │ RPC
-        ▼
-SERVER stack  (Docker compose)
-   api-gateway   Hono + Postgres   public REST API
-   indexer       Rust              getProgramAccounts → view-key match → webhook
-   relayer       Rust + Axum       fee-payer cosign + admission policy
-   postgres                         institutions / deposits / audit log
-   redis                            rate-limit / queue (V2)
-   caddy                            HTTP reverse proxy
 
-DASHBOARD  (Vercel)
-   apps/dashboard                   Next.js 16 + Tailwind, /api proxy → server`}
-      </CodeBlock>
+      <Primitive
+        n={1}
+        title="Per-payment stealth addresses (Curve25519)"
+        v1="Cryptonote-style two-key derivation adapted for Curve25519. The institution publishes spend_pub and view_pub. For each payment, the gateway samples r, computes R = r·G, and derives the per-payment stealth pubkey P = spend_pub + H(r·view_pub)·G. Implemented twice — once in the Rust crate stealth-core (used by the indexer) and once in the TypeScript port at apps/api-gateway/src/stealth.ts (used by the gateway). Byte-exact equality is locked by a unit test in both languages."
+        v2="V2 will combine address-level privacy with amount-level privacy by layering Token-2022 Confidential Balances on top, so the institution can also keep transfer amounts private from the public chain while the AML oracle still sees them."
+      />
+
+      <Primitive
+        n={2}
+        title="Quarantine vault (Anchor program)"
+        v1="An Anchor program at programs/quarantine-vault holds incoming SOL or SPL tokens in a per-deposit escrow PDA at state Pending. The Vault account stores an oracle_set (max 16) and a min_attestations threshold. Each oracle in the set can post one Attestation per deposit; once clean_count or dirty_count reaches the threshold, state advances to Approved or Rejected. Released funds leave from the deposit PDA via an explicit release instruction; refunded funds go back to a refund_addr captured at deposit time."
+        v2="V1 ships the m-of-n state machine, but the oracle set in the demo is just three keypairs that vote however the demo endpoint tells them to. V2 wires real adapters — Chainalysis, TRM Labs, Range — that produce signed attestations from external risk scores. We also add evidence_hash IPFS upload and a per-attestor dispute window."
+      />
+
+      <Primitive
+        n={3}
+        title='Hyperscaled treasury ("no consolidation")'
+        v1="Each release in the demo flow goes to a freshly generated pubkey — there is no on-chain link between successive payments to the same institution. This is the Bitcoin UTXO best-practice (one address per receive) reapplied to Solana, where ATA rent (~0.002 SOL) makes per-payment accounts cheap. Note: V1 does not enforce uniqueness in the program; it's a discipline of the demo flow. The institution is free to re-use targets if it wants."
+        v2="V2 will add a slice planner: an off-chain coin-selection layer that decides which slice receives each release based on an internal balance ledger, plus an aggregate balance UI in the dashboard so the institution can still feel like 'one wallet' while operating across thousands of slices on chain."
+      />
     </section>
   );
 }
 
-/* ──────────────────────────────────────────────────────────────────────── */
-
-function QuickStart() {
+function Primitive({
+  n,
+  title,
+  v1,
+  v2,
+}: {
+  n: number;
+  title: string;
+  v1: string;
+  v2: string;
+}) {
   return (
-    <section id="quickstart" className="space-y-4 scroll-mt-20">
-      <SectionHeading>Quick start (60 seconds, terminal)</SectionHeading>
-      <p className="text-sm leading-7">
-        Five real Solana devnet transactions. Each one is verifiable on Solana
-        Explorer. The same flow runs from the dashboard&apos;s &quot;Try the
-        live demo&quot; button — the only difference is the buttons replace the
-        curls.
-      </p>
-      <CodeBlock language="bash">
-        {`PROXY=${API_BASE}
-KEY=${DEMO_KEY}
-
-# 1. Mint a fresh deposit (refund_addr is auto-wired to the on-server demo wallet)
-INIT=$(curl -fsS -X POST "$PROXY/v1/demo/init" -H "x-api-key: $KEY")
-ID=$(echo "$INIT" | jq -r .deposit_id)
-echo "  deposit_id: $ID"
-
-# 2. Simulate a real customer payment on devnet (0.1 SOL → stealth address)
-curl -fsS -X POST "$PROXY/v1/demo/simulate-payment" -H "x-api-key: $KEY" \\
-  -H "content-type: application/json" -d "{\\"deposit_id\\":\\"$ID\\"}" | jq .explorer_tx
-
-sleep 8  # indexer scan interval
-
-# 3. AML attestation: 2-of-3 oracles sign CLEAN → state moves to Approved
-curl -fsS -X POST "$PROXY/v1/demo/attest" -H "x-api-key: $KEY" \\
-  -H "content-type: application/json" \\
-  -d "{\\"deposit_id\\":\\"$ID\\",\\"verdict\\":\\"clean\\"}" | jq .explorer_txs
-
-sleep 8
-
-# 4. Release to a fresh treasury slice (no consolidation = no on-chain link)
-curl -fsS -X POST "$PROXY/v1/demo/release" -H "x-api-key: $KEY" \\
-  -H "content-type: application/json" -d "{\\"deposit_id\\":\\"$ID\\"}" | jq .
-
-sleep 7
-
-# 5. Final state — gateway record now mirrors on-chain
-curl -fsS "$PROXY/v1/payment-status/$ID" -H "x-api-key: $KEY" | jq .state`}
-      </CodeBlock>
-      <Callout tone="info">
-        Want one-click? The dashboard&apos;s{" "}
-        <Link href="/" className="underline">
-          /
-        </Link>{" "}
-        landing page does the exact same calls behind a single button.
-      </Callout>
-    </section>
-  );
-}
-
-/* ──────────────────────────────────────────────────────────────────────── */
-
-function RestApi() {
-  return (
-    <section id="api" className="space-y-6 scroll-mt-20">
-      <SectionHeading>REST API</SectionHeading>
-      <div className="text-sm space-y-2">
-        <p>
-          <strong>Base URL:</strong>{" "}
-          <code className="mono">{API_BASE}</code>
-        </p>
-        <p>
-          <strong>Auth:</strong> every request needs{" "}
-          <code className="mono">X-API-Key</code> matching one of the{" "}
-          <code className="mono">institutions</code> table rows. The demo
-          institution&apos;s key is <code className="mono">{DEMO_KEY}</code>.
-        </p>
-        <p>
-          <strong>Errors:</strong> non-2xx responses are JSON{" "}
-          <code className="mono">{`{ error: string, detail?: any }`}</code>.
-        </p>
+    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-5 space-y-3">
+      <div className="flex items-start gap-3">
+        <span className="w-7 h-7 shrink-0 rounded-full bg-[var(--accent)] text-[var(--accent-fg)] text-xs font-semibold inline-flex items-center justify-center">
+          {n}
+        </span>
+        <h3 className="text-base font-semibold tracking-tight pt-0.5">
+          {title}
+        </h3>
       </div>
-
-      <Endpoint
-        method="POST"
-        path="/v1/receiving-address"
-        summary="Generate a fresh stealth address for one payment."
-        body={`{
-  "customer_id": "C-1234",
-  "amount_hint": "100000000",        // smallest units
-  "mint": "USDC",                    // metadata only; SOL via demo flow
-  "expire_seconds": 3600,
-  "refund_addr_hex": "00".repeat(32) // 32-byte hex
-}`}
-        response={`{
-  "deposit_id": "dep_xxx",
-  "stealth_pubkey_hex": "a09243…",
-  "ephemeral_r_hex":    "841a55…",
-  "view_tag": 115,
-  "expires_at": 1778342668574
-}`}
-        curl={`curl -X POST "${API_BASE}/v1/receiving-address" \\
-  -H "x-api-key: ${DEMO_KEY}" \\
-  -H "content-type: application/json" \\
-  -d '{"customer_id":"C-1234","amount_hint":"100000000","mint":"USDC","expire_seconds":3600,"refund_addr_hex":"${"00".repeat(
-    32,
-  )}"}'`}
-      />
-
-      <Endpoint
-        method="GET"
-        path="/v1/payment-status/:id"
-        summary="Read a deposit's current state, including any on-chain match recorded by the indexer."
-        response={`{
-  "deposit_id": "dep_xxx",
-  "state": "pending" | "approved" | "rejected" | "released" | "refunded" | "expired",
-  "amount_hint": "100000000",
-  "stealth_pubkey_hex": "a09243…",
-  "view_tag": 115,
-  "expires_at": 1778342668574,
-  "on_chain_address": "CrKu5EYNCT9c…" | null,
-  "on_chain_amount":  "100000000"      | null,
-  "on_chain_state":   "pending"        | null
-}`}
-        curl={`curl "${API_BASE}/v1/payment-status/dep_xxx" -H "x-api-key: ${DEMO_KEY}"`}
-      />
-
-      <Endpoint
-        method="GET"
-        path="/v1/treasury/deposits"
-        summary="Aggregate deposit count by state for the calling institution."
-        response={`{ "total": 3, "by_state": { "pending": 1, "released": 2 } }`}
-        curl={`curl "${API_BASE}/v1/treasury/deposits" -H "x-api-key: ${DEMO_KEY}"`}
-      />
-
-      <Endpoint
-        method="GET"
-        path="/v1/treasury/deposits/list?limit=N"
-        summary="Paginated list of full deposit records, newest first. Default limit 100, max 500."
-        response={`{
-  "total": 1,
-  "items": [
-    {
-      "deposit_id": "dep_xxx",
-      "customer_id": "C-1234",
-      "amount_hint": "100000000",
-      "mint": "SOL",
-      "stealth_pubkey_hex": "a09243…",
-      "view_tag": 115,
-      "state": "released",
-      "created_at": 1778338767824,
-      "expires_at": 1778342367823,
-      "on_chain_address": "CrKu5EYNCT…",
-      "on_chain_amount":  "100000000",
-      "on_chain_state":   "released",
-      "on_chain_observed_at": 1778338835946
-    }
-  ]
-}`}
-        curl={`curl "${API_BASE}/v1/treasury/deposits/list?limit=20" -H "x-api-key: ${DEMO_KEY}"`}
-      />
-
-      <Endpoint
-        method="POST"
-        path="/v1/release"
-        summary="Mark an Approved deposit as released in the gateway DB. Pair with the on-chain release tx (see /v1/demo/release for the bundled-execution variant)."
-        body={`{
-  "deposit_id": "dep_xxx",
-  "target_addr_hex": "cd".repeat(32)
-}`}
-        response={`{
-  "deposit_id": "dep_xxx",
-  "state": "released",
-  "target_addr_hex": "cdcd…"
-}`}
-        curl={`curl -X POST "${API_BASE}/v1/release" \\
-  -H "x-api-key: ${DEMO_KEY}" \\
-  -H "content-type: application/json" \\
-  -d '{"deposit_id":"dep_xxx","target_addr_hex":"${"cd".repeat(32)}"}'`}
-      />
-
-      <Endpoint
-        method="POST"
-        path="/v1/refund"
-        summary="Mark a Rejected/Expired deposit as refunded. Returns the on-chain refund destination set at deposit time."
-        body={`{ "deposit_id": "dep_xxx" }`}
-        response={`{
-  "deposit_id": "dep_xxx",
-  "state": "refunded",
-  "refund_addr_hex": "00…"
-}`}
-        curl={`curl -X POST "${API_BASE}/v1/refund" \\
-  -H "x-api-key: ${DEMO_KEY}" \\
-  -H "content-type: application/json" \\
-  -d '{"deposit_id":"dep_xxx"}'`}
-      />
-    </section>
+      <div>
+        <Tag tone="success">V1 ships</Tag>
+        <p className="text-sm leading-6 mt-2">{v1}</p>
+      </div>
+      <div>
+        <Tag tone="warn">V2 plans</Tag>
+        <p className="text-sm leading-6 mt-2 text-[var(--muted)]">{v2}</p>
+      </div>
+    </div>
   );
 }
 
-/* ──────────────────────────────────────────────────────────────────────── */
-
-function DemoApi() {
+function EndToEnd() {
   return (
-    <section id="demo-api" className="space-y-6 scroll-mt-20">
+    <section id="flow" className="space-y-4 scroll-mt-20">
       <SectionHeading>
-        Demo API <DemoBadge />
+        End-to-end flow (what actually happens when you click the buttons)
       </SectionHeading>
-      <p className="text-sm leading-7">
-        These endpoints execute real Solana devnet transactions on the
-        operator&apos;s behalf using server-side keypairs (a demo wallet, two
-        oracle signers, and the vault authority). They exist so a hackathon
-        judge can verify the full lifecycle without holding any keys, and they
-        are{" "}
-        <strong>scoped to the bundled demo institution only</strong>. A
-        production deployment would replace them with proper webhooks,
-        institution-side signers, and an HSM-backed signing service.
-      </p>
-
-      <Endpoint
-        method="POST"
-        path="/v1/demo/init"
-        demo
-        summary="Create a deposit record with sensible demo defaults: 0.1 SOL, refund_addr pre-wired to the on-server demo wallet, 1-hour expiry."
-        response={`{
-  "deposit_id": "dep_xxx",
-  "stealth_pubkey_hex": "3d0a10…",
-  "ephemeral_r_hex":    "048c87…",
-  "view_tag": 92,
-  "refund_pubkey": "E5sMsf…",
-  "expires_at": 1778343825242
-}`}
-        curl={`curl -X POST "${API_BASE}/v1/demo/init" -H "x-api-key: ${DEMO_KEY}"`}
-      />
-
-      <Endpoint
-        method="POST"
-        path="/v1/demo/simulate-payment"
-        demo
-        summary="Submit a real on-chain SOL deposit to the deposit's stealth address. The indexer picks it up within ~5s."
-        body={`{ "deposit_id": "dep_xxx" }`}
-        response={`{
-  "stage": "simulate",
-  "signature": "3P1D5m…",
-  "deposit_pda": "AXhCPv…",
-  "explorer_tx":      "https://explorer.solana.com/tx/3P1D5m…?cluster=devnet",
-  "explorer_account": "https://explorer.solana.com/address/AXhCPv…?cluster=devnet"
-}`}
-        curl={`curl -X POST "${API_BASE}/v1/demo/simulate-payment" \\
-  -H "x-api-key: ${DEMO_KEY}" \\
-  -H "content-type: application/json" \\
-  -d '{"deposit_id":"dep_xxx"}'`}
-      />
-
-      <Endpoint
-        method="POST"
-        path="/v1/demo/attest"
-        demo
-        summary="Two oracles sign an attestation with the given verdict. Threshold (2-of-3) is reached in one call so the on-chain state moves immediately."
-        body={`{
-  "deposit_id": "dep_xxx",
-  "verdict": "clean" | "dirty"
-}`}
-        response={`{
-  "stage": "attest",
-  "verdict": "clean",
-  "signatures":   ["2HUEki…", "2KR9sW…"],
-  "explorer_txs": ["https://explorer.solana.com/tx/2HUEki…?cluster=devnet", "..."]
-}`}
-        curl={`curl -X POST "${API_BASE}/v1/demo/attest" \\
-  -H "x-api-key: ${DEMO_KEY}" \\
-  -H "content-type: application/json" \\
-  -d '{"deposit_id":"dep_xxx","verdict":"clean"}'`}
-      />
-
-      <Endpoint
-        method="POST"
-        path="/v1/demo/release"
-        demo
-        summary="Release an Approved deposit's lamports to a freshly generated treasury slice (a brand-new pubkey, deliberately not consolidated with prior slices)."
-        body={`{ "deposit_id": "dep_xxx" }`}
-        response={`{
-  "stage": "release",
-  "signature": "61guN7…",
-  "target": "6vGTSK…",
-  "explorer_tx":     "https://explorer.solana.com/tx/61guN7…?cluster=devnet",
-  "explorer_target": "https://explorer.solana.com/address/6vGTSK…?cluster=devnet"
-}`}
-        curl={`curl -X POST "${API_BASE}/v1/demo/release" \\
-  -H "x-api-key: ${DEMO_KEY}" \\
-  -H "content-type: application/json" \\
-  -d '{"deposit_id":"dep_xxx"}'`}
-      />
-
-      <Endpoint
-        method="POST"
-        path="/v1/demo/refund"
-        demo
-        summary="Refund a Rejected/Expired deposit back to the registered refund address (the demo wallet)."
-        body={`{ "deposit_id": "dep_xxx" }`}
-        response={`{
-  "stage": "refund",
-  "signature": "...",
-  "refund_target": "E5sMsf…",
-  "explorer_tx": "https://explorer.solana.com/tx/...?cluster=devnet"
-}`}
-        curl={`curl -X POST "${API_BASE}/v1/demo/refund" \\
-  -H "x-api-key: ${DEMO_KEY}" \\
-  -H "content-type: application/json" \\
-  -d '{"deposit_id":"dep_xxx"}'`}
-      />
-    </section>
-  );
-}
-
-/* ──────────────────────────────────────────────────────────────────────── */
-
-function OnChain() {
-  return (
-    <section id="onchain" className="space-y-6 scroll-mt-20">
-      <SectionHeading>Anchor program</SectionHeading>
-      <div className="text-sm space-y-2">
-        <p>
-          <strong>Program ID:</strong>{" "}
-          <ExternalLink href={`https://explorer.solana.com/address/${PROGRAM_ID}?cluster=devnet`}>
-            <span className="mono">{PROGRAM_ID}</span> ↗
-          </ExternalLink>
-        </p>
-        <p>
-          <strong>Source:</strong>{" "}
-          <ExternalLink href="https://github.com/nzengi/g-pay/tree/main/programs/quarantine-vault">
-            programs/quarantine-vault
-          </ExternalLink>
-        </p>
-      </div>
-
-      <h3 className="text-base font-semibold tracking-tight pt-2">
-        Instructions (8)
-      </h3>
-      <Table
-        head={["Name", "Signs", "Effect"]}
-        rows={[
-          [
-            "initialize_vault",
-            "authority",
-            "Creates Vault PDA. Stores oracle_set + min_attestations.",
-          ],
-          [
-            "deposit",
-            "depositor",
-            "Locks SOL in a Deposit PDA at state = Pending. PDA seed: [\"deposit\", vault, stealth_pubkey, ephemeral_r].",
-          ],
-          [
-            "deposit_token",
-            "depositor",
-            "SPL Token / Token-2022 variant. Deposits to a per-deposit escrow_token_account whose authority is the Deposit PDA.",
-          ],
-          [
-            "attest",
-            "oracle ∈ oracle_set",
-            "Records one Attestation. When clean_count ≥ threshold → state = Approved; dirty_count ≥ threshold → Rejected.",
-          ],
-          [
-            "release",
-            "release_authority (per-deposit)",
-            "Approved → Released. Lamports move to a target pubkey.",
-          ],
-          [
-            "release_token",
-            "release_authority",
-            "SPL variant. token::transfer_checked from escrow_token_account → target_token_account.",
-          ],
-          [
-            "refund",
-            "any caller",
-            "Rejected | Expired | (Pending past expire) → Refunded. Sends to deposit.refund_addr.",
-          ],
-          [
-            "refund_token",
-            "any caller",
-            "SPL variant. Validates refund_target_token_account.owner == deposit.refund_addr.",
-          ],
-        ]}
-      />
-
-      <h3 className="text-base font-semibold tracking-tight pt-2">
-        Account types
-      </h3>
-
-      <div className="space-y-4">
-        <AccountSchema
-          name="Vault"
-          fields={[
-            ["bump", "u8"],
-            ["authority", "Pubkey"],
-            ["oracle_set", "Vec<Pubkey>", "AML attestor allowlist (max 16)"],
-            ["min_attestations", "u8", "m of n threshold"],
-            ["paused", "bool"],
-            ["deposit_count", "u64"],
-          ]}
-        />
-        <AccountSchema
-          name="Deposit"
-          fields={[
-            ["bump", "u8"],
-            ["vault", "Pubkey"],
-            ["stealth_pubkey", "Pubkey", "off-chain receive address"],
-            ["ephemeral_r", "[u8; 32]", "sender's ephemeral pubkey"],
-            ["view_tag", "u8", "1-byte view-key tag (fast prefilter)"],
-            ["mint", "Pubkey", "Pubkey::default for SOL deposits"],
-            ["amount", "u64"],
-            ["depositor", "Pubkey"],
-            ["refund_addr", "Pubkey"],
-            ["release_authority", "Pubkey"],
-            ["created_at / expire_at", "i64"],
-            ["state", "DepositState"],
-            ["attestations", "Vec<Attestation>", "max 16"],
-            ["clean_count / dirty_count", "u8"],
-          ]}
-        />
-      </div>
-
-      <h3 className="text-base font-semibold tracking-tight pt-2">PDA seeds</h3>
-      <CodeBlock>
-        {`vault           = ["vault",   authority]
-deposit         = ["deposit", vault, stealth_pubkey, ephemeral_r]
-escrow_token    = ["escrow_token", deposit]   // only for SPL deposits
-
-DepositState  = Pending | Approved | Rejected | Released | Refunded | Expired
-AmlVerdict    = Clean | Dirty`}
-      </CodeBlock>
-    </section>
-  );
-}
-
-/* ──────────────────────────────────────────────────────────────────────── */
-
-function StealthMath() {
-  return (
-    <section id="stealth" className="space-y-4 scroll-mt-20">
-      <SectionHeading>Stealth-address derivation</SectionHeading>
-      <p className="text-sm leading-7">
-        Cryptonote-style two-key scheme adapted for Curve25519. The institution
-        publishes <code className="mono">spend_pub</code> and{" "}
-        <code className="mono">view_pub</code>; private{" "}
-        <code className="mono">spend_priv</code> stays in HSM, private{" "}
-        <code className="mono">view_priv</code> goes to the indexer for
-        scanning.
-      </p>
-
-      <CodeBlock>
-        {`Domain separators (UTF-8 bytes):
-  DOMAIN_SHARED   = "g-pay/stealth/shared/v1"
-  DOMAIN_OFFSET   = "g-pay/stealth/offset/v1"
-  DOMAIN_VIEW_TAG = "g-pay/stealth/view-tag/v1"
-
-Sender (per payment):
-  r          = Scalar::from_bytes_mod_order_wide(random 64 bytes)
-  R          = r · G                                       // ephemeral_r
-  shared     = sha512(DOMAIN_SHARED || (r · view_pub).compress())[..32]
-  offset     = Scalar::from_bytes_mod_order_wide(
-                 sha512(DOMAIN_OFFSET || shared || nonce_le8))
-  P          = spend_pub + offset · G                      // stealth pubkey
-  view_tag   = sha512(DOMAIN_VIEW_TAG || shared)[0]        // 1-byte prefilter
-
-Recipient (per chain account observed):
-  shared'    = sha512(DOMAIN_SHARED || (view_priv · R).compress())[..32]
-  if sha512(DOMAIN_VIEW_TAG || shared')[0] != on-chain view_tag: skip
-  derive(spend_pub, shared', nonce); compare with on-chain stealth_pubkey
-  spend scalar = (spend_priv + offset) mod L`}
-      </CodeBlock>
-
-      <h3 className="text-base font-semibold tracking-tight pt-2">
-        Cross-language test vector
-      </h3>
-      <p className="text-sm leading-7">
-        The exact same algorithm is implemented twice — the Rust crate{" "}
-        <code className="mono">stealth-core</code> (used by the indexer and on-chain
-        derivation) and the TypeScript port at{" "}
-        <code className="mono">apps/api-gateway/src/stealth.ts</code> (used to
-        generate addresses on the API side). Both must agree byte-exact on the
-        following vector, locked in unit tests:
-      </p>
-      <CodeBlock>
-        {`spend_priv     = 0102030405060708090a0b0c0d0e0f10
-                 1112131415161718191a1b1c1d1e1f00
-view_priv      = a0a1a2a3a4a5a6a7a8a9aaabacadaeaf
-                 b0b1b2b3b4b5b6b7b8b9babbbcbdbe00
-r_seed (64B)   = 21 22 … 60     (sequential bytes)
-nonce          = 7
-
-⇒  spend_pub      = 616e237719716e25ead63d831f9117f7
-                    9b5aa05af8be30ff0eddb3dc43e8bdcf
-   view_pub       = 3e97bbe3dad77cdbab3b9d7a5af96386
-                    8b2ee668470874b566dad4a32076c98b
-   stealth_pubkey = 20fa85036bcc5661f62af10c241ee824
-                    3e2543735e7e869c58df13b02f3c26c3
-   ephemeral_r    = 21c24081dfbed643c24ca431092386e1
-                    cb0830937d5b4f4cc0d6f366586338b0
-   view_tag       = 0xbf`}
-      </CodeBlock>
-
-      <p className="text-sm leading-7">
-        See{" "}
-        <ExternalLink href="https://github.com/nzengi/g-pay/blob/main/crates/stealth-core/tests/vectors.rs">
-          crates/stealth-core/tests/vectors.rs
-        </ExternalLink>{" "}
-        and{" "}
-        <ExternalLink href="https://github.com/nzengi/g-pay/blob/main/apps/api-gateway/tests/vector.test.ts">
-          apps/api-gateway/tests/vector.test.ts
-        </ExternalLink>
-        . If you change the algorithm, update both sides simultaneously and
-        relock the vector.
-      </p>
-    </section>
-  );
-}
-
-/* ──────────────────────────────────────────────────────────────────────── */
-
-function IndexerRelayer() {
-  return (
-    <section id="pipeline" className="space-y-4 scroll-mt-20">
-      <SectionHeading>Indexer & relayer</SectionHeading>
-      <p className="text-sm leading-7">
-        Two Rust services round out the server stack. Both run inside Docker
-        and have <em>no</em> public-facing endpoints (Caddy blocks{" "}
-        <code className="mono">/v1/internal/*</code>; the relayer&apos;s HTTP
-        port is internal-only).
-      </p>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4 text-sm space-y-2">
-          <div className="font-semibold">indexer</div>
-          <p className="text-xs leading-5 text-[var(--muted)]">
-            Polls{" "}
-            <code className="mono">getProgramAccounts</code> every{" "}
-            <code className="mono">GPAY_SCAN_INTERVAL_MS</code> (default 5s),
-            filters by Deposit account size, scans each candidate against the
-            registered slice&apos;s <code className="mono">view_priv</code>{" "}
-            using <code className="mono">stealth-core</code>, and POSTs matches
-            to the gateway&apos;s{" "}
-            <code className="mono">/v1/internal/deposit-detected</code> webhook
-            (HMAC&apos;d by{" "}
-            <code className="mono">GPAY_INTERNAL_SECRET</code>).
-          </p>
-          <ExternalLink href="https://github.com/nzengi/g-pay/tree/main/crates/indexer">
-            crates/indexer ↗
-          </ExternalLink>
-        </div>
-
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4 text-sm space-y-2">
-          <div className="font-semibold">relayer</div>
-          <p className="text-xs leading-5 text-[var(--muted)]">
-            Axum HTTP service that accepts a base64-encoded{" "}
-            <code className="mono">VersionedTransaction</code>, runs
-            per-institution admission (token-bucket rate limit + monthly USDC
-            cap + suspension), cosigns as fee payer, and submits to RPC.
-            Designed so customers never need to hold SOL for fees.
-          </p>
-          <ExternalLink href="https://github.com/nzengi/g-pay/tree/main/crates/relayer">
-            crates/relayer ↗
-          </ExternalLink>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ──────────────────────────────────────────────────────────────────────── */
-
-function Security() {
-  return (
-    <section id="security" className="space-y-4 scroll-mt-20">
-      <SectionHeading>Security & limitations</SectionHeading>
-
-      <Callout tone="danger">
-        Pre-audit. Devnet only. Do not move real value. The Anchor program has
-        not had a third-party security review.
+      <ol className="space-y-3 text-sm leading-6 list-decimal list-inside">
+        <li>
+          <strong>Initialize a deposit.</strong> The dashboard hits{" "}
+          <code className="mono">POST /v1/demo/init</code>. The gateway derives
+          a fresh stealth address (<code className="mono">P</code>,{" "}
+          <code className="mono">R</code>,{" "}
+          <code className="mono">view_tag</code>) using the demo
+          institution&apos;s public keys, writes a row to Postgres with state{" "}
+          <code className="mono">pending</code>, and pre-wires{" "}
+          <code className="mono">refund_addr</code> to the on-server demo
+          wallet.
+        </li>
+        <li>
+          <strong>Customer payment.</strong> The dashboard&apos;s &quot;Simulate
+          customer payment&quot; button calls{" "}
+          <code className="mono">POST /v1/demo/simulate-payment</code>. The
+          gateway shells out to the bundled{" "}
+          <code className="mono">gpay-cli</code> binary, which submits a real
+          Solana devnet transaction — the program&apos;s{" "}
+          <code className="mono">deposit</code> instruction — that creates a
+          new <code className="mono">Deposit</code> PDA holding 0.1 SOL.
+        </li>
+        <li>
+          <strong>Indexer scan.</strong> Roughly every 5 seconds, the indexer
+          (a separate Rust process) calls{" "}
+          <code className="mono">getProgramAccounts</code> on the program,
+          filtered by Deposit account size. For each candidate it computes the
+          shared secret with the registered slice&apos;s view-private key, and
+          if the derived pubkey matches the on-chain{" "}
+          <code className="mono">stealth_pubkey</code>, it POSTs an internal
+          webhook to the gateway. The gateway updates the deposit row with{" "}
+          <code className="mono">on_chain_address</code> + amount.
+        </li>
+        <li>
+          <strong>AML attestation.</strong> Two oracles sign{" "}
+          <code className="mono">attest</code> instructions with verdict =
+          clean (or dirty). On the second signature the threshold is reached
+          and the on-chain deposit moves to{" "}
+          <code className="mono">Approved</code> (or{" "}
+          <code className="mono">Rejected</code>). The next indexer pass
+          mirrors the new state into the gateway record.{" "}
+          <em>
+            In V1 the oracles are just keypairs that vote whatever the demo
+            endpoint tells them; the attestation flow is real, the
+            risk-scoring source is not.
+          </em>
+        </li>
+        <li>
+          <strong>Release.</strong> Approved deposits can be released. The
+          dashboard&apos;s release button generates a fresh target pubkey on
+          the server (a new treasury slice), then submits the program&apos;s{" "}
+          <code className="mono">release</code> instruction signed by the
+          deposit&apos;s recorded{" "}
+          <code className="mono">release_authority</code>. Lamports move from
+          the deposit PDA to the fresh slice. Indexer picks up the new state,
+          gateway records <code className="mono">released</code>.
+        </li>
+        <li>
+          <strong>Refund.</strong> Rejected or expired deposits can be refunded
+          to the captured <code className="mono">refund_addr</code>. The
+          program enforces that{" "}
+          <code className="mono">refund_target == deposit.refund_addr</code>.
+        </li>
+      </ol>
+      <Callout tone="info">
+        Every transaction in the flow is a normal Solana devnet transaction
+        with a public signature. Your dashboard records each one with a Solana
+        Explorer link so you can verify them out-of-band.
       </Callout>
+    </section>
+  );
+}
 
-      <h3 className="text-base font-semibold tracking-tight pt-2">
-        Demo institution caveat
-      </h3>
-      <p className="text-sm leading-7">
-        The bundled demo uses{" "}
-        <strong>publicly documented test vectors</strong> for the institution
-        keys (<code className="mono">spend_priv = 0102…1f00</code>,{" "}
-        <code className="mono">view_priv = a0a1…be00</code>). A real institution
-        generates its own keys inside an HSM; only the public parts (
-        <code className="mono">spend_pub</code>,{" "}
-        <code className="mono">view_pub</code>) live in the gateway&apos;s
-        institutions table.
+function Status() {
+  return (
+    <section id="status" className="space-y-4 scroll-mt-20">
+      <SectionHeading>What V1 ships (and what it doesn&apos;t)</SectionHeading>
+      <p className="text-sm leading-7 text-[var(--muted)]">
+        Honest table — green is verified working, yellow is real but stubbed,
+        gray is intentionally out-of-scope for V1.
       </p>
+      <table className="w-full text-sm bg-[var(--surface)] border border-[var(--border)] rounded-lg overflow-hidden">
+        <thead className="bg-[var(--surface-2)] text-xs uppercase tracking-wider text-[var(--muted)]">
+          <tr>
+            <th className="text-left px-4 py-2">Component</th>
+            <th className="text-left px-4 py-2">V1 status</th>
+            <th className="text-left px-4 py-2">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(
+            [
+              [
+                "Anchor program",
+                "ok",
+                "8 instructions on devnet (initialize_vault, deposit/_token, attest, release/_token, refund/_token). LiteSVM tests cover the SOL paths end-to-end.",
+              ],
+              [
+                "Stealth-address derivation",
+                "ok",
+                "Rust + TypeScript, byte-exact cross-language test vector locked in unit tests.",
+              ],
+              [
+                "Indexer (devnet RPC scan)",
+                "ok",
+                "Polls getProgramAccounts every 5s, view-key match, posts to gateway internal webhook.",
+              ],
+              [
+                "API gateway (REST + Postgres)",
+                "ok",
+                "6 public endpoints + 5 demo endpoints + 1 internal webhook, served behind a Caddy reverse proxy on the server.",
+              ],
+              [
+                "Dashboard (Next.js on Vercel)",
+                "ok",
+                "Guided demo flow, deposit detail with stepper, Solana Explorer links per transaction.",
+              ],
+              [
+                "AML oracle",
+                "stub",
+                "The m-of-n attestation flow is real on chain; the verdict source is just keypairs that vote whatever the demo endpoint says. No Chainalysis / TRM yet.",
+              ],
+              [
+                "Relayer (fee-payer service)",
+                "stub",
+                "Service exists with rate limit + admission policy + cosign helper, but the demo flow currently bypasses it (the demo wallet pays its own fees).",
+              ],
+              [
+                "Hyperscaled treasury aggregator",
+                "stub",
+                "The demo flow generates a fresh release target every time, but the program does not enforce uniqueness and there is no slice-balance aggregator UI yet.",
+              ],
+              [
+                "Webhook delivery to institutions",
+                "out",
+                "Internal indexer→gateway webhook works; outbound institution callbacks are V2.",
+              ],
+              [
+                "SPL deposits in the demo flow",
+                "out",
+                "The program supports Token + Token-2022 (deposit_token / release_token / refund_token), but the dashboard only drives the SOL path. CLI subcommand for SPL deposit is also V2.",
+              ],
+              [
+                "Mainnet deployment",
+                "out",
+                "V1 is devnet-only on purpose. Mainnet requires audit + KMS-backed signers + real oracle integrations.",
+              ],
+            ] as [string, "ok" | "stub" | "out", string][]
+          ).map(([c, s, n]) => (
+            <tr key={c} className="border-t border-[var(--border)]">
+              <td className="px-4 py-3 font-medium text-sm">{c}</td>
+              <td className="px-4 py-3">
+                <StatusPill kind={s} />
+              </td>
+              <td className="px-4 py-3 text-xs leading-5 text-[var(--muted)]">
+                {n}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}
 
-      <h3 className="text-base font-semibold tracking-tight pt-2">
-        In scope for the cryptography
-      </h3>
-      <ul className="list-disc list-inside text-sm space-y-1 text-[var(--muted)]">
-        <li>
-          The Ed25519/Curve25519 derivation in{" "}
-          <code className="mono">crates/stealth-core</code> and its TS port.
-        </li>
-        <li>
-          The Anchor instruction set at{" "}
-          <code className="mono">programs/quarantine-vault</code>.
-        </li>
-        <li>
-          Cross-language vector agreement — any deviation between Rust and TS
-          is treated as a security issue.
-        </li>
-      </ul>
+function StatusPill({ kind }: { kind: "ok" | "stub" | "out" }) {
+  const map = {
+    ok: ["var(--success)", "Working"],
+    stub: ["var(--warn)", "Stub"],
+    out: ["var(--muted)", "V2 / out of scope"],
+  } as const;
+  const [color, label] = map[kind];
+  return (
+    <span
+      className="px-2 h-6 inline-flex items-center rounded text-[10px] font-semibold tracking-wider"
+      style={{
+        background: `${color}22`,
+        color,
+        border: `1px solid ${color}66`,
+      }}
+    >
+      {label}
+    </span>
+  );
+}
 
-      <h3 className="text-base font-semibold tracking-tight pt-2">
-        Known gaps (PRs welcome)
-      </h3>
-      <ul className="list-disc list-inside text-sm space-y-1 text-[var(--muted)]">
-        <li>
-          AML oracle is a stub. Real Chainalysis / TRM / Range adapter is the
-          next step.
-        </li>
-        <li>
-          View key lives on disk in <code className="mono">config/slices.json</code>{" "}
-          for dev. Production must back this with KMS/HSM.
-        </li>
-        <li>
-          Relayer keypair is loaded from a JSON file. Production should use a
-          remote signer.
-        </li>
-        <li>
-          Dashboard stores the institution API key in{" "}
-          <code className="mono">localStorage</code>. Real customer onboarding
-          needs a proper auth flow (SSO / mTLS / signed requests).
-        </li>
-        <li>
-          The IP-only deployment uses HTTP; pointing a domain enables Caddy
-          auto-TLS — do that before any external exposure.
-        </li>
-      </ul>
-
-      <p className="text-sm leading-7">
-        Full disclosure policy:{" "}
-        <ExternalLink href="https://github.com/nzengi/g-pay/blob/main/SECURITY.md">
-          SECURITY.md
+function RepoStructure() {
+  return (
+    <section id="repo" className="space-y-3 scroll-mt-20">
+      <SectionHeading>Repo structure</SectionHeading>
+      <p className="text-sm leading-7 text-[var(--muted)]">
+        Each path below corresponds to a real piece of code on{" "}
+        <ExternalLink href="https://github.com/nzengi/g-pay">
+          GitHub
         </ExternalLink>
         .
       </p>
+      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg overflow-x-auto">
+        <table className="w-full text-sm">
+          <tbody>
+            {(
+              [
+                [
+                  "programs/quarantine-vault/",
+                  "Anchor program (Rust, SBF). 8 instructions, 2 accounts.",
+                ],
+                [
+                  "crates/stealth-core/",
+                  "Curve25519 stealth-address derivation, scan, and spend-key reconstruction. The cross-language test vector lives here.",
+                ],
+                [
+                  "crates/indexer/",
+                  "Devnet RPC scanner. Long-running Rust binary that polls the program, view-key matches, posts to the gateway.",
+                ],
+                [
+                  "crates/relayer/",
+                  "Axum HTTP fee-payer service. V1 has the policy + cosign helper; not yet wired into the demo path.",
+                ],
+                [
+                  "crates/cli/",
+                  "Operator CLI. Used by the gateway demo endpoints to build + sign + submit the actual on-chain transactions.",
+                ],
+                [
+                  "apps/api-gateway/",
+                  "Hono + Node + Postgres REST API. 6 public endpoints + 5 demo endpoints + 1 internal webhook.",
+                ],
+                [
+                  "apps/dashboard/",
+                  "Next.js 16 + Tailwind frontend. Hosted on Vercel. /, /docs, /api, /deposits/* routes.",
+                ],
+                [
+                  "deploy/",
+                  "Docker compose stack (postgres + redis + caddy + 3 services), Postgres migrations, Caddyfile.",
+                ],
+                [
+                  "scripts/",
+                  "bootstrap-local.sh, deploy-program-devnet.sh, build-artifacts.sh, deploy-server.sh.",
+                ],
+              ] as [string, string][]
+            ).map(([path, what]) => (
+              <tr
+                key={path}
+                className="border-b border-[var(--border)] last:border-0"
+              >
+                <td className="px-4 py-2 mono text-xs text-[var(--accent)] whitespace-nowrap align-top">
+                  {path}
+                </td>
+                <td className="px-4 py-2 text-xs leading-5">{what}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
 
-/* ──────────────────────────────────────────────────────────────────────── */
-
-function Resources() {
-  const links: [string, string][] = [
-    ["DESIGN.md — full architecture & threat model", "https://github.com/nzengi/g-pay/blob/main/docs/DESIGN.md"],
-    ["RUNBOOK.md — local stack + e2e demo", "https://github.com/nzengi/g-pay/blob/main/docs/RUNBOOK.md"],
-    ["DEPLOY.md — server deployment plan", "https://github.com/nzengi/g-pay/blob/main/docs/DEPLOY.md"],
-    ["VERCEL.md — dashboard deployment", "https://github.com/nzengi/g-pay/blob/main/docs/VERCEL.md"],
-    ["SECURITY.md — disclosure policy", "https://github.com/nzengi/g-pay/blob/main/SECURITY.md"],
-    ["CONTRIBUTING.md — PR checklist", "https://github.com/nzengi/g-pay/blob/main/CONTRIBUTING.md"],
-  ];
+function V2Hints() {
   return (
-    <section id="resources" className="space-y-4 scroll-mt-20">
-      <SectionHeading>Resources</SectionHeading>
-      <ul className="space-y-2 text-sm">
-        {links.map(([label, href]) => (
-          <li key={href}>
-            <ExternalLink href={href}>{label} ↗</ExternalLink>
-          </li>
-        ))}
+    <section id="v2" className="space-y-4 scroll-mt-20">
+      <SectionHeading>V2 roadmap</SectionHeading>
+      <p className="text-sm leading-7 text-[var(--muted)]">
+        Not promises — directions of work, ordered roughly by impact.
+      </p>
+      <ol className="space-y-3 text-sm leading-7 list-decimal list-inside">
+        <li>
+          <strong>Real AML oracle.</strong> Chainalysis + TRM Labs + Range
+          adapters that turn external risk scores into on-chain attestations,
+          with evidence-hash → IPFS upload and a per-attestor dispute window.
+          The m-of-n primitive stays exactly the same; only the verdict source
+          changes.
+        </li>
+        <li>
+          <strong>Relayer in the loop.</strong> Today the demo flow signs and
+          pays fees from a single demo wallet, so the relayer service is
+          dormant. V2 routes every customer-side and release-side transaction
+          through the relayer&apos;s{" "}
+          <code className="mono">/v1/submit</code> endpoint so customers
+          don&apos;t need SOL for fees and operators get a single billing
+          surface.
+        </li>
+        <li>
+          <strong>Confidential amounts on top.</strong> Compose stealth-address
+          (address privacy) with Token-2022 Confidential Balances (amount
+          privacy). The institution gets full transfer privacy from the public
+          chain; auditor-key holders (the institution itself + regulator under
+          court order) still see plaintext.
+        </li>
+        <li>
+          <strong>Real institution signing.</strong> View key in HSM/KMS, no
+          plaintext on disk anywhere. Release authority via remote signer
+          (Ledger / Fireblocks / Squads multisig). API key replaced by signed
+          requests + mTLS.
+        </li>
+        <li>
+          <strong>Outbound webhooks + retry queue.</strong> When a deposit
+          changes state, the gateway POSTs to an institution-supplied URL with
+          HMAC and an idempotency key, retries with exponential backoff, and
+          surfaces failures in the dashboard.
+        </li>
+        <li>
+          <strong>SPL deposit demo path.</strong> The program already supports{" "}
+          <code className="mono">deposit_token</code> /{" "}
+          <code className="mono">release_token</code> /{" "}
+          <code className="mono">refund_token</code>. V2 adds the matching
+          gpay-cli subcommands and a dashboard token selector so judges can
+          test USDC alongside SOL.
+        </li>
+        <li>
+          <strong>Sub-second detection.</strong> Replace the indexer&apos;s 5s
+          polling with <code className="mono">programSubscribe</code> over
+          WebSocket. Same match logic, lower latency, fewer RPC calls.
+        </li>
+        <li>
+          <strong>Slice planner.</strong> Off-chain coin-selection layer that
+          chooses release targets based on an internal balance ledger, plus an
+          aggregated balance UI so the institution feels like &quot;one
+          wallet&quot; while operating across many slices.
+        </li>
+        <li>
+          <strong>Domain + TLS.</strong> Point a domain at the server, switch
+          Caddy to <code className="mono">your-domain.com</code> for automatic
+          Let&apos;s Encrypt. Until then the dashboard hits the gateway via a
+          Vercel rewrite to bypass mixed-content blocks.
+        </li>
+        <li>
+          <strong>Audit + mainnet.</strong> Third-party security review
+          (OtterSec / Sec3 / Neodyme) covering the program + the indexer
+          webhook auth + the relayer admission flow, before any mainnet write.
+        </li>
+      </ol>
+    </section>
+  );
+}
+
+function Caveats() {
+  return (
+    <section id="caveats" className="space-y-4 scroll-mt-20">
+      <SectionHeading>Caveats</SectionHeading>
+      <Callout tone="danger">
+        V1 is pre-audit, devnet only. Do not move real value through it.
+      </Callout>
+      <ul className="list-disc list-inside text-sm space-y-2 leading-6">
+        <li>
+          <strong>Demo institution test vectors.</strong> The bundled demo uses
+          publicly documented private keys for the institution
+          (<code className="mono">spend_priv = 0102…1f00</code>,{" "}
+          <code className="mono">view_priv = a0a1…be00</code>). They live in{" "}
+          <code className="mono">crates/stealth-core/tests/vectors.rs</code> on
+          purpose, so the cross-language test can lock byte-exact derivation.
+          Real institutions generate their keys inside an HSM and the gateway
+          only ever sees the public parts.
+        </li>
+        <li>
+          <strong>Demo wallet on disk.</strong> The on-server keypair that
+          plays the customer + release authority in the demo flow is funded
+          with devnet SOL only. Its private key sits at{" "}
+          <code className="mono">config/demo-wallet.json</code> on the server
+          and is <strong>not in the public repo</strong> (.gitignore covers
+          it).
+        </li>
+        <li>
+          <strong>Oracle keys on disk.</strong> Same story for the three oracle
+          keypairs. Real production oracles would each be operated by separate
+          institutions / risk vendors with their own signing infrastructure.
+        </li>
+        <li>
+          <strong>HTTP only.</strong> The server is exposed on its IP over
+          plain HTTP. The dashboard reaches it through a Vercel rewrite (HTTPS
+          to HTTPS, then Vercel proxies HTTP server-side) — that side-steps
+          mixed-content for now but is not a substitute for a domain + TLS.
+        </li>
+        <li>
+          See{" "}
+          <ExternalLink href="https://github.com/nzengi/g-pay/blob/main/SECURITY.md">
+            SECURITY.md
+          </ExternalLink>{" "}
+          for the disclosure policy and the full known-gaps list.
+        </li>
       </ul>
     </section>
   );
 }
 
-/* ──────────────────────────────────────────────────────────────────────── */
-/*  Building blocks                                                          */
 /* ──────────────────────────────────────────────────────────────────────── */
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="text-2xl font-semibold tracking-tight">{children}</h2>
+  );
+}
+
+function Tag({
+  tone,
+  children,
+}: {
+  tone: "success" | "warn";
+  children: React.ReactNode;
+}) {
+  const color = tone === "success" ? "var(--success)" : "var(--warn)";
+  return (
+    <span
+      className="px-2 h-5 inline-flex items-center rounded text-[10px] font-semibold tracking-wider uppercase"
+      style={{
+        background: `${color}22`,
+        color,
+        border: `1px solid ${color}66`,
+      }}
+    >
+      {children}
+    </span>
   );
 }
 
@@ -923,187 +662,9 @@ function Callout({
       style={{
         borderColor: `${color}66`,
         background: `${color}11`,
-        color,
       }}
     >
       <div className="text-[var(--foreground)]">{children}</div>
-    </div>
-  );
-}
-
-function CodeBlock({
-  children,
-  language,
-}: {
-  children: React.ReactNode;
-  language?: string;
-}) {
-  return (
-    <div className="relative">
-      {language && (
-        <div className="absolute right-3 top-2 text-[10px] uppercase tracking-wider text-[var(--muted)]">
-          {language}
-        </div>
-      )}
-      <pre className="bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-4 text-xs overflow-x-auto leading-6 mono">
-        <code>{children}</code>
-      </pre>
-    </div>
-  );
-}
-
-function MethodChip({ method }: { method: string }) {
-  const color =
-    method === "GET"
-      ? "var(--success)"
-      : method === "POST"
-        ? "var(--accent)"
-        : method === "DELETE"
-          ? "var(--danger)"
-          : "var(--muted)";
-  return (
-    <span
-      className="px-2 h-6 inline-flex items-center rounded text-[10px] font-semibold tracking-wider mono"
-      style={{ background: `${color}22`, color, border: `1px solid ${color}66` }}
-    >
-      {method}
-    </span>
-  );
-}
-
-function DemoBadge() {
-  return (
-    <span className="ml-3 align-middle text-[10px] uppercase tracking-wider px-2 h-5 inline-flex items-center rounded-full bg-[var(--warn)] bg-opacity-10 text-[var(--warn)] border border-[var(--warn)]">
-      devnet only
-    </span>
-  );
-}
-
-function Endpoint({
-  method,
-  path,
-  summary,
-  body,
-  response,
-  curl,
-  demo,
-}: {
-  method: string;
-  path: string;
-  summary: string;
-  body?: string;
-  response: string;
-  curl: string;
-  demo?: boolean;
-}) {
-  return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-5 space-y-3">
-      <div className="flex items-start gap-3 flex-wrap">
-        <MethodChip method={method} />
-        <code className="mono text-sm font-medium break-all">{path}</code>
-        {demo && (
-          <span className="text-[10px] uppercase tracking-wider text-[var(--warn)]">
-            devnet
-          </span>
-        )}
-      </div>
-      <p className="text-sm text-[var(--muted)] leading-6">{summary}</p>
-      {body && (
-        <div>
-          <div className="text-xs uppercase tracking-wider text-[var(--muted)] mb-1.5">
-            Request body
-          </div>
-          <CodeBlock>{body}</CodeBlock>
-        </div>
-      )}
-      <div>
-        <div className="text-xs uppercase tracking-wider text-[var(--muted)] mb-1.5">
-          Response
-        </div>
-        <CodeBlock>{response}</CodeBlock>
-      </div>
-      <div>
-        <div className="text-xs uppercase tracking-wider text-[var(--muted)] mb-1.5">
-          curl
-        </div>
-        <CodeBlock language="bash">{curl}</CodeBlock>
-      </div>
-    </div>
-  );
-}
-
-function Table({
-  head,
-  rows,
-}: {
-  head: string[];
-  rows: (string | React.ReactNode)[][];
-}) {
-  return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="bg-[var(--surface-2)]">
-          <tr>
-            {head.map((h, i) => (
-              <th
-                key={i}
-                className="text-left px-4 py-2 text-xs uppercase tracking-wider text-[var(--muted)] font-medium"
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr
-              key={i}
-              className="border-t border-[var(--border)] align-top"
-            >
-              {row.map((cell, j) => (
-                <td key={j} className="px-4 py-3">
-                  {typeof cell === "string" && j === 0 ? (
-                    <code className="mono text-xs">{cell}</code>
-                  ) : typeof cell === "string" && j < 2 ? (
-                    <code className="mono text-xs text-[var(--muted)]">
-                      {cell}
-                    </code>
-                  ) : (
-                    <span className="text-xs leading-5">{cell}</span>
-                  )}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function AccountSchema({
-  name,
-  fields,
-}: {
-  name: string;
-  fields: [string, string, string?][];
-}) {
-  return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg overflow-x-auto">
-      <div className="px-4 py-2 text-sm font-semibold mono">{name}</div>
-      <table className="w-full text-sm">
-        <tbody>
-          {fields.map(([f, t, n], i) => (
-            <tr key={i} className="border-t border-[var(--border)]">
-              <td className="px-4 py-2 mono text-xs whitespace-nowrap">{f}</td>
-              <td className="px-4 py-2 mono text-xs text-[var(--muted)] whitespace-nowrap">
-                {t}
-              </td>
-              <td className="px-4 py-2 text-xs leading-5">{n ?? ""}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }

@@ -78,7 +78,13 @@ export default function LandingPage() {
               href="/docs"
               className="h-12 px-6 rounded-md border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors inline-flex items-center"
             >
-              API & developer docs
+              Docs
+            </a>
+            <a
+              href="/api"
+              className="h-12 px-6 rounded-md border border-[var(--border)] text-sm font-medium hover:border-[var(--accent)] transition-colors inline-flex items-center"
+            >
+              API
             </a>
             <a
               href="https://github.com/nzengi/g-pay"
