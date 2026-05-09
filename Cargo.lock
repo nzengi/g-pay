@@ -2114,7 +2114,7 @@ dependencies = [
  "serde_json",
  "solana-client",
  "solana-commitment-config",
- "solana-hash 3.1.0",
+ "solana-hash 4.3.0",
  "solana-instruction",
  "solana-keypair",
  "solana-message",
