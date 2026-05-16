@@ -22,7 +22,7 @@ hex = { workspace = true }
 
 solana-client = "3"
 solana-sdk = "3"
-solana-account-decoder = "3"
+solana-account-decoder = "4"
 solana-commitment-config = "3"
 
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking"] }
