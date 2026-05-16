@@ -27,7 +27,7 @@ curve25519-dalek = { version = "4.1", default-features = false, features = ["all
 ed25519-dalek = { version = "2.1", default-features = false, features = ["alloc", "rand_core", "zeroize"] }
 sha2 = { version = "0.10", default-features = false }
 hkdf = { version = "0.12", default-features = false }
-rand = "0.8"
+rand = "0.9"
 subtle = "2.6"
 zeroize = { version = "1.8", features = ["zeroize_derive"] }
 hex = "0.4"
